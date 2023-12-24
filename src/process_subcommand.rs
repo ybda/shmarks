@@ -23,14 +23,21 @@ pub fn ls(m: &ArgMatches, toml_map: &mut AliasesDirs) {
     }
 
     // Colored print in two columns
-    let alias_style = nu_ansi_term::Color::LightGreen.bold();
     let max_length = toml_map.keys().map(|s| s.len()).max().unwrap_or(0);
-    let color_len = alias_style.paint(".").to_string().len() - 1;
+
+    if max_length == 0 {
+        return;
+    }
+
+    let alias_style = nu_ansi_term::Color::LightGreen.bold();
+    let alias_style_len = alias_style.paint(".").to_string().len() - 1;
+    
+    const MIN_NUMBER_OF_SPACES: usize = 3;
 
     for key in toml_map.keys() {
-        let padding = max_length - key.len() + color_len;
+        let padding = max_length - key.len() + alias_style_len + MIN_NUMBER_OF_SPACES;
         let formatted_string = format!(
-            "{:<width$}   {}",
+            "{:<width$}{}",
             alias_style.paint(key).to_string(),
             toml_map[key].to_string_lossy(),
             width = key.len() + padding
