@@ -23,15 +23,15 @@ pub fn ls(m: &ArgMatches, toml_map: &mut AliasesDirs) {
     }
 
     // Colored print in two columns
-    let alias_color = nu_ansi_term::Color::LightCyan;
-    let color_len = alias_color.paint(".").to_string().len() - 1;
+    let alias_style = nu_ansi_term::Color::LightGreen.bold();
     let max_length = toml_map.keys().map(|s| s.len()).max().unwrap_or(0);
+    let color_len = alias_style.paint(".").to_string().len() - 1;
 
     for key in toml_map.keys() {
         let padding = max_length - key.len() + color_len;
         let formatted_string = format!(
             "{:<width$}   {}",
-            alias_color.paint(key).to_string(),
+            alias_style.paint(key).to_string(),
             toml_map[key].to_string_lossy(),
             width = key.len() + padding
         );
@@ -41,19 +41,25 @@ pub fn ls(m: &ArgMatches, toml_map: &mut AliasesDirs) {
 
 pub fn rm(m: &ArgMatches, toml_map: &mut AliasesDirs) -> Result<()> {
     if let Some(alias) = m.get_one::<String>("alias") {
-        toml_map.remove(alias);
-        return Ok(());
+        if toml_map.contains_key(alias) {
+            toml_map.remove(alias);
+            return Ok(());
+        }
+        return Err(Error::Io(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            format!("Alias '{}' not found", alias),
+        )));
     }
 
     if let Some(directory) = m.get_one::<PathBuf>("directory") {
         let absolute_directory = normalize::abs_normalize_path(&directory)?;
-        util::remove_first_value_from_map(toml_map, &absolute_directory);
+        util::remove_first_value_from_aliases_dirs(toml_map, &absolute_directory)?;
         return Ok(());
     }
 
     // Handle default case when there's no args
     let pwd = normalize::abs_normalize_path(&PathBuf::from("."))?;
-    util::remove_first_value_from_map(toml_map, &pwd);
+    util::remove_first_value_from_aliases_dirs(toml_map, &pwd)?;
 
     Ok(())
 }
@@ -77,7 +83,10 @@ pub fn none(m: &ArgMatches, toml_map: &AliasesDirs, shmarks_file_path: &PathBuf)
             return Ok(());
         }
 
-        return Err(Error::Msg(format!("Alias '{}' not found", alias)));
+        return Err(Error::Io(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            format!("Alias '{}' not found", alias),
+        )));
     }
 
     if m.get_flag("edit") {
