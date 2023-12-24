@@ -42,6 +42,7 @@ pub fn matches() -> ArgMatches {
         .subcommand(
             Command::new("rm")
                 .visible_alias("r")
+                .alias("remove")
                 .about("Remove mark. Removes mark of current dir if no options provided")
                 .arg(
                     Arg::new("alias")
@@ -62,6 +63,7 @@ pub fn matches() -> ArgMatches {
         .subcommand(
             Command::new("ls")
                 .visible_alias("l")
+                .alias("list")
                 .about("List all marks")
                 .arg(
                     Arg::new("directory")

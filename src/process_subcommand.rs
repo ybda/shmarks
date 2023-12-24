@@ -31,7 +31,7 @@ pub fn ls(m: &ArgMatches, toml_map: &mut AliasesDirs) {
 
     let alias_style = nu_ansi_term::Color::LightGreen.bold();
     let alias_style_len = alias_style.paint(".").to_string().len() - 1;
-    
+
     const MIN_NUMBER_OF_SPACES: usize = 3;
 
     for key in toml_map.keys() {
@@ -52,10 +52,8 @@ pub fn rm(m: &ArgMatches, toml_map: &mut AliasesDirs) -> Result<()> {
             toml_map.remove(alias);
             return Ok(());
         }
-        return Err(Error::Io(std::io::Error::new(
-            std::io::ErrorKind::NotFound,
-            format!("Alias '{}' not found", alias),
-        )));
+
+        return Err(Error::AliasNotFound(alias.to_string()));
     }
 
     let dir = {
@@ -90,10 +88,7 @@ pub fn none(m: &ArgMatches, toml_map: &AliasesDirs, shmarks_file_path: &PathBuf)
             return Ok(());
         }
 
-        return Err(Error::Io(std::io::Error::new(
-            std::io::ErrorKind::NotFound,
-            format!("Alias '{}' not found", alias),
-        )));
+        return Err(Error::AliasNotFound(alias.to_string()));
     }
 
     if m.get_flag("edit") {

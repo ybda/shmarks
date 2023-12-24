@@ -15,6 +15,12 @@ pub enum Error {
 
     #[error("{0}")]
     Msg(String),
+
+    #[error("Alias '{0}' not found")]
+    AliasNotFound(String),
+
+    #[error("Alias of directory '{0}' not found")]
+    AliasOfDirectoryXNotFound(String),
 }
 
 impl From<&'static str> for Error {

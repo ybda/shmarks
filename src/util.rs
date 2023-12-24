@@ -1,4 +1,4 @@
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::toml_parser::AliasesDirs;
 use std::collections::BTreeMap;
 use std::fs::File;
@@ -18,40 +18,22 @@ pub fn replace_contents_of_file(path: &PathBuf, contents: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn remove_first_value_from_aliases_dirs(
-    map: &mut AliasesDirs,
-    value: &PathBuf,
-) -> std::result::Result<(), std::io::Error> {
-    match remove_first_value_from_map(map, value) {
-        Ok(_) => return Ok(()),
-        Err(e) => match e.kind() {
-            std::io::ErrorKind::NotFound => {
-                return Err(std::io::Error::new(e.kind(), format!("Alias of directory '{}' not found", value.to_string_lossy())))
-            }
-            _ => return Err(e),
-        },
+pub fn remove_first_value_from_aliases_dirs(map: &mut AliasesDirs, value: &PathBuf) -> Result<()> {
+    if let Some(fval) = first_value_from_map(map, value) {
+        map.remove(&fval);
+        Ok(())
+    } else {
+        Err(Error::AliasOfDirectoryXNotFound(
+            value.to_string_lossy().to_string(),
+        ))
     }
 }
 
-fn remove_first_value_from_map<K, V>(
-    map: &mut BTreeMap<K, V>,
-    value: &V,
-) -> std::result::Result<(), std::io::Error>
+fn first_value_from_map<K, V>(map: &BTreeMap<K, V>, value: &V) -> Option<K>
 where
     V: PartialEq,
-    K: Ord + Clone,
+    K: Clone,
 {
-    let key_to_remove = map
-        .iter()
-        .find_map(|(k, v)| if *v == *value { Some(k.clone()) } else { None });
-
-    if let Some(key) = key_to_remove {
-        map.remove(&key);
-        return Ok(());
-    }
-
-    return Err(std::io::Error::new(
-        std::io::ErrorKind::NotFound,
-        "Key wasn't found",
-    ));
+    map.iter()
+        .find_map(|(k, v)| if *v == *value { Some(k.clone()) } else { None })
 }
