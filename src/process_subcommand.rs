@@ -51,15 +51,15 @@ pub fn rm(m: &ArgMatches, toml_map: &mut AliasesDirs) -> Result<()> {
         )));
     }
 
-    if let Some(directory) = m.get_one::<PathBuf>("directory") {
-        let absolute_directory = normalize::abs_normalize_path(&directory)?;
-        util::remove_first_value_from_aliases_dirs(toml_map, &absolute_directory)?;
-        return Ok(());
-    }
+    let dir = {
+        if let Some(directory) = m.get_one::<PathBuf>("directory") {
+            normalize::abs_normalize_path(&directory)?
+        } else {
+            env::current_dir()? // By default current dir is used
+        }
+    };
 
-    // Handle default case when there's no args
-    let pwd = normalize::abs_normalize_path(&PathBuf::from("."))?;
-    util::remove_first_value_from_aliases_dirs(toml_map, &pwd)?;
+    util::remove_first_value_from_aliases_dirs(toml_map, &dir)?;
 
     Ok(())
 }
