@@ -108,7 +108,7 @@ pub fn none(m: &ArgMatches, toml_map: &AliasesDirs, shmarks_file_path: &PathBuf)
         return Ok(());
     }
 
-    let default_alias_name = "_default";
+    let default_alias_name = "DEFAULT";
     if let Some(dir) = toml_map.get(default_alias_name) {
         println!("{}", dir.to_string_lossy());
     } else {
