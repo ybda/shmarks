@@ -64,7 +64,7 @@ pub fn rm(m: &ArgMatches, toml_map: &mut AliasesDirs) -> Result<()> {
         }
     };
 
-    util::remove_first_value_from_aliases_dirs(toml_map, &dir)?;
+    util::remove_elements_of_aliases_dirs_by_value(toml_map, &dir)?;
 
     Ok(())
 }

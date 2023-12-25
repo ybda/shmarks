@@ -1,6 +1,5 @@
 use crate::error::{Error, Result};
 use crate::toml_parser::AliasesDirs;
-use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
@@ -18,22 +17,22 @@ pub fn replace_contents_of_file(path: &PathBuf, contents: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn remove_first_value_from_aliases_dirs(map: &mut AliasesDirs, value: &PathBuf) -> Result<()> {
-    if let Some(fval) = first_value_from_map(map, value) {
-        map.remove(&fval);
-        Ok(())
-    } else {
-        Err(Error::AliasOfDirectoryXNotFound(
-            value.to_string_lossy().to_string(),
-        ))
-    }
-}
+pub fn remove_elements_of_aliases_dirs_by_value(
+    map: &mut AliasesDirs,
+    value: &PathBuf,
+) -> Result<()> {
+    let len_before = map.len();
 
-fn first_value_from_map<K, V>(map: &BTreeMap<K, V>, value: &V) -> Option<K>
-where
-    V: PartialEq,
-    K: Clone,
-{
-    map.iter()
-        .find_map(|(k, v)| if *v == *value { Some(k.clone()) } else { None })
+    {
+        let value_str = value.to_str().unwrap();
+        map.retain(|_, v| v.to_str().unwrap() != value_str);
+    }
+
+    if len_before == map.len() {
+        return Err(Error::AliasOfDirectoryXNotFound(
+            value.to_string_lossy().to_string(),
+        ));
+    }
+
+    Ok(())
 }
