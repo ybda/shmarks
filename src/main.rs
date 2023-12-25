@@ -11,14 +11,14 @@ use crate::error::Result;
 use dirs;
 use error::Error;
 use std::env;
+use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::process;
 use toml;
 
 fn main() {
     run().unwrap_or_else(|e| {
-        let stderr = std::io::stderr();
-        error::default_error_handler(&e, &mut stderr.lock());
+        error::default_error_handler(&e, &mut std::io::stderr().lock());
         process::exit(1);
     })
 }
@@ -35,23 +35,29 @@ fn run() -> Result<()> {
 
 fn retrieve_shmarks_file_path() -> Result<PathBuf> {
     const ENV_VAR_NAME: &str = "SHMARKS_LIST_FILE";
+    const SHMARKS_DEFAULT_FILENAME: &str = "shmarks.toml";
 
     let shmarks_file_path = match env::var(ENV_VAR_NAME) {
         Ok(value) => PathBuf::from(value),
-        Err(_) => dirs::config_local_dir().ok_or_else(|| {
-            Error::from(format!(
-                "Failed to resolve default config directory. Set '{}' environment variable",
-                ENV_VAR_NAME
-            ))
-        })?,
+        Err(_) => {
+            let default_dir = dirs::config_local_dir().ok_or_else(|| {
+                Error::from(format!(
+                    "Failed to resolve default config directory. Set '{}' environment variable",
+                    ENV_VAR_NAME
+                ))
+            })?;
+            default_dir.join(SHMARKS_DEFAULT_FILENAME)
+        }
     };
 
-    if !shmarks_file_path.is_file() {
-        return Err(Error::from(format!(
-            "Environment variable '{}' is not a file, provided path: '{}'",
-            ENV_VAR_NAME,
-            shmarks_file_path.to_string_lossy()
-        )));
+    if !shmarks_file_path.exists() {
+        File::create(&shmarks_file_path).map_err(|err| {
+            format!(
+                "Failed creating '{}': {}",
+                &shmarks_file_path.to_string_lossy(),
+                err
+            )
+        })?;
     }
 
     Ok(shmarks_file_path)
