@@ -4,7 +4,7 @@ use crate::{aliases_dirs, normalize, util};
 use crate::app;
 use clap::ArgMatches;
 use std::env;
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 use std::process;
 
 pub fn ls(m: &ArgMatches, ad: &mut AliasesDirs) {
@@ -69,6 +69,9 @@ pub fn rm(m: &ArgMatches, ad: &mut AliasesDirs) -> Result<()> {
 
 pub fn new(m: &ArgMatches, ad: &mut AliasesDirs) -> Result<()> {
     let alias_arg = m.get_one::<String>(app::ARG_ALIAS).unwrap();
+
+    aliases_dirs::validate_alias_name(alias_arg)?;
+    
     let absolute_path_arg = {
         let path_arg = m.get_one::<PathBuf>(app::ARG_DIRECTORY).unwrap();
         normalize::abs_normalize_path(path_arg)?
@@ -79,7 +82,7 @@ pub fn new(m: &ArgMatches, ad: &mut AliasesDirs) -> Result<()> {
     Ok(())
 }
 
-pub fn none(m: &ArgMatches, ad: &AliasesDirs, shmarks_file_path: &PathBuf) -> Result<()> {
+pub fn none(m: &ArgMatches, ad: &AliasesDirs, shmarks_file_path: &Path) -> Result<()> {
     if let Some(alias) = m.get_one::<String>(app::ARG_ALIAS) {
         let dir_to_set = ad.get(alias);
         if let Some(dir) = dir_to_set {
@@ -114,7 +117,7 @@ pub fn none(m: &ArgMatches, ad: &AliasesDirs, shmarks_file_path: &PathBuf) -> Re
         return Ok(());
     } 
     
-    Err(Error::Msg(format!(
+    Err(Error::from(format!(
         "No default directory was set, add alias '{}' to cd into default directory",
         default_alias_name
     )))

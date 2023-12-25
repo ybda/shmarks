@@ -31,28 +31,23 @@ pub fn abs_normalize_path(path: &PathBuf) -> Result<PathBuf> {
 mod tests {
     use super::*;
 
-    fn check(before: &str, after: &str) {
-        println!("-----------------\nnormalizing {:?}", before);
-        // The test here doesn't work on Windows
-        //
-        // There are two problems, at least:
-        //
-        // * strings used for test use the '/' separator. This is a test problem
-        // * we do a "end with '/'" test in the tested function. This might
-        //   lead to suboptimal interaction on windows
-        assert_eq!(
-            normalize_path(&PathBuf::from(before)).to_string_lossy(),
-            after
-        );
-    }
-
     #[test]
-    fn test_resolve_nonexistent_path() {
-        check("/home/dys/..", "/home");
-        check("/home/./dys/../", "/home");
-        check("./home/./dys/../", "home");
-        check("/abc/test/../thing.png", "/abc/thing.png");
-        check("/abc/def/../../thing.png", "/thing.png");
-        check("/abc/def/../fe/../thing.png", "/abc/thing.png");
+    fn test_normalize_path() {
+        let test_cases: Vec<(&str, &str)> = vec![
+            ("/home/dys/..", "/home"),
+            ("/home/./dys/../", "/home"),
+            ("home/./dys/../", "home"),
+            ("./home/./dys/../", "home"),
+            ("/abc/test/../thing.png", "/abc/thing.png"),
+            ("/abc/def/../../thing.png", "/thing.png"),
+            ("/abc/def/../fe/../thing.png", "/abc/thing.png"),
+        ];
+
+        for &(left, right) in &test_cases {
+            assert_eq!(
+                normalize_path(&PathBuf::from(left)).to_string_lossy(),
+                right
+            );
+        }
     }
 }

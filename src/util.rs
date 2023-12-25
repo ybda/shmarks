@@ -2,16 +2,16 @@ use crate::error::Result;
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::{Read, Write};
-use std::path::PathBuf;
+use std::path::Path;
 
-pub fn read_contents_file(filepath: &PathBuf) -> Result<String> {
+pub fn read_file_contents(filepath: &Path) -> Result<String> {
     let mut toml_str = String::new();
     let mut file = File::open(filepath)?;
     file.read_to_string(&mut toml_str)?;
     Ok(toml_str)
 }
 
-pub fn replace_contents_of_file(path: &PathBuf, contents: &str) -> Result<()> {
+pub fn replace_contents_of_file(path: &Path, contents: &str) -> Result<()> {
     let mut modified_file = File::create(path)?; // Truncate file
     modified_file.write_all(contents.as_bytes())?;
     Ok(())

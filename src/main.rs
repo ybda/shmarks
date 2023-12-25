@@ -11,7 +11,7 @@ use crate::error::Result;
 use dirs;
 use error::Error;
 use std::env;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process;
 use toml;
 
@@ -39,7 +39,7 @@ fn retrieve_shmarks_file_path() -> Result<PathBuf> {
     let shmarks_file_path = match env::var(ENV_VAR_NAME) {
         Ok(value) => PathBuf::from(value),
         Err(_) => dirs::config_local_dir().ok_or_else(|| {
-            Error::Msg(format!(
+            Error::from(format!(
                 "Failed to resolve default config directory. Set '{}' environment variable",
                 ENV_VAR_NAME
             ))
@@ -47,8 +47,8 @@ fn retrieve_shmarks_file_path() -> Result<PathBuf> {
     };
 
     if !shmarks_file_path.is_file() {
-        return Err(Error::Msg(format!(
-            "Environment variable '{}' is not a file, provided path: {}",
+        return Err(Error::from(format!(
+            "Environment variable '{}' is not a file, provided path: '{}'",
             ENV_VAR_NAME,
             shmarks_file_path.to_string_lossy()
         )));
@@ -57,8 +57,8 @@ fn retrieve_shmarks_file_path() -> Result<PathBuf> {
     Ok(shmarks_file_path)
 }
 
-fn retrieve_aliases_dirs(shmarks_file_path: &PathBuf) -> Result<AliasesDirs> {
-    let toml_str = util::read_contents_file(&shmarks_file_path).map_err(|err| {
+fn retrieve_aliases_dirs(shmarks_file_path: &Path) -> Result<AliasesDirs> {
+    let toml_str = util::read_file_contents(&shmarks_file_path).map_err(|err| {
         format!(
             "Failed reading '{}': {}",
             shmarks_file_path.to_str().unwrap(),
@@ -85,7 +85,7 @@ fn retrieve_aliases_dirs(shmarks_file_path: &PathBuf) -> Result<AliasesDirs> {
     Ok(ad)
 }
 
-fn match_subcommands(ad: &mut AliasesDirs, shmarks_file_path: &PathBuf) -> Result<()> {
+fn match_subcommands(ad: &mut AliasesDirs, shmarks_file_path: &Path) -> Result<()> {
     let matches = app::matches();
 
     match matches.subcommand() {
@@ -104,7 +104,7 @@ fn match_subcommands(ad: &mut AliasesDirs, shmarks_file_path: &PathBuf) -> Resul
     Ok(())
 }
 
-fn update_toml_file(ad: &AliasesDirs, shmarks_file_path: &PathBuf) -> Result<()> {
+fn update_toml_file(ad: &AliasesDirs, shmarks_file_path: &Path) -> Result<()> {
     let toml_new_string = toml::to_string_pretty(&aliases_dirs::to_toml(&ad))?;
 
     util::replace_contents_of_file(&shmarks_file_path, &toml_new_string).map_err(|e| {
