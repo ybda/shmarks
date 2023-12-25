@@ -1,31 +1,29 @@
+use crate::aliases_dirs::AliasesDirs;
 use crate::error::{Error, Result};
-use crate::normalize;
-use crate::toml_parser::AliasesDirs;
-use crate::util;
+use crate::{aliases_dirs, normalize, util};
 use clap::ArgMatches;
 use std::env;
 use std::path::PathBuf;
 use std::process;
 
-pub fn ls(m: &ArgMatches, toml_map: &mut AliasesDirs) {
+pub fn ls(m: &ArgMatches, ad: &mut AliasesDirs) {
+    let keys_len = ad.keys().len();
+    if keys_len == 0 {
+        return;
+    }
+
     // Simple print like "a1 a2 a3\n"
+
     if !m.get_flag("directory") {
-        let keys_len = toml_map.keys().len();
-        for (index, element) in toml_map.keys().enumerate() {
-            if index < keys_len - 1 {
-                print!("{} ", element);
-            } else {
-                print!("{}", element);
-            }
-        }
-        println!();
+        util::print_keys_separated_by_space(ad);
         return;
     }
 
     // Colored print in two columns
-    let max_length = toml_map.keys().map(|s| s.len()).max().unwrap_or(0);
 
-    if max_length == 0 {
+    let max_alias_length = ad.keys().map(|s| s.len()).max().unwrap_or(0); 
+
+    if max_alias_length == 0 {
         return;
     }
 
@@ -34,22 +32,21 @@ pub fn ls(m: &ArgMatches, toml_map: &mut AliasesDirs) {
 
     const MIN_NUMBER_OF_SPACES: usize = 3;
 
-    for key in toml_map.keys() {
-        let padding = max_length - key.len() + alias_style_len + MIN_NUMBER_OF_SPACES;
-        let formatted_string = format!(
+    let padding = max_alias_length + alias_style_len + MIN_NUMBER_OF_SPACES;
+    for alias in ad.keys() {
+        println!(
             "{:<width$}{}",
-            alias_style.paint(key).to_string(),
-            toml_map[key].to_string_lossy(),
-            width = key.len() + padding
+            alias_style.paint(alias).to_string(),
+            ad[alias].to_string_lossy(),
+            width = padding
         );
-        println!("{}", formatted_string);
     }
 }
 
-pub fn rm(m: &ArgMatches, toml_map: &mut AliasesDirs) -> Result<()> {
+pub fn rm(m: &ArgMatches, ad: &mut AliasesDirs) -> Result<()> {
     if let Some(alias) = m.get_one::<String>("alias") {
-        if toml_map.contains_key(alias) {
-            toml_map.remove(alias);
+        if ad.contains_key(alias) {
+            ad.remove(alias);
             return Ok(());
         }
 
@@ -64,25 +61,25 @@ pub fn rm(m: &ArgMatches, toml_map: &mut AliasesDirs) -> Result<()> {
         }
     };
 
-    util::remove_elements_of_aliases_dirs_by_value(toml_map, &dir)?;
+    aliases_dirs::remove_elements_of_aliases_dirs_by_value(ad, &dir)?;
 
     Ok(())
 }
 
-pub fn new(m: &ArgMatches, toml_map: &mut AliasesDirs) -> Result<()> {
+pub fn new(m: &ArgMatches, ad: &mut AliasesDirs) -> Result<()> {
     let alias_arg = m.get_one::<String>("alias").unwrap();
     let absolute_path_arg = {
         let path_arg = m.get_one::<PathBuf>("directory").unwrap();
         normalize::abs_normalize_path(path_arg)?
     };
 
-    toml_map.insert(alias_arg.to_string(), absolute_path_arg);
+    ad.insert(alias_arg.to_string(), absolute_path_arg);
     Ok(())
 }
 
-pub fn none(m: &ArgMatches, toml_map: &AliasesDirs, shmarks_file_path: &PathBuf) -> Result<()> {
+pub fn none(m: &ArgMatches, ad: &AliasesDirs, shmarks_file_path: &PathBuf) -> Result<()> {
     if let Some(alias) = m.get_one::<String>("alias") {
-        let dir_to_set = toml_map.get(alias);
+        let dir_to_set = ad.get(alias);
         if let Some(dir) = dir_to_set {
             println!("{}", dir.to_string_lossy());
             return Ok(());
@@ -109,14 +106,14 @@ pub fn none(m: &ArgMatches, toml_map: &AliasesDirs, shmarks_file_path: &PathBuf)
     }
 
     let default_alias_name = "DEFAULT";
-    if let Some(dir) = toml_map.get(default_alias_name) {
+    if let Some(dir) = ad.get(default_alias_name) {
         println!("{}", dir.to_string_lossy());
-    } else {
-        return Err(Error::Msg(format!(
-            "No default directory was set, add alias '{}' to cd into default directory",
-            default_alias_name
-        )));
-    }
 
-    Ok(())
+        return Ok(());
+    } 
+    
+    Err(Error::Msg(format!(
+        "No default directory was set, add alias '{}' to cd into default directory",
+        default_alias_name
+    )))
 }

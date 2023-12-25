@@ -1,5 +1,5 @@
-use crate::error::{Error, Result};
-use crate::toml_parser::AliasesDirs;
+use crate::error::Result;
+use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
@@ -17,22 +17,18 @@ pub fn replace_contents_of_file(path: &PathBuf, contents: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn remove_elements_of_aliases_dirs_by_value(
-    map: &mut AliasesDirs,
-    value: &PathBuf,
-) -> Result<()> {
-    let len_before = map.len();
-
-    {
-        let value_str = value.to_str().unwrap();
-        map.retain(|_, v| v.to_str().unwrap() != value_str);
+pub fn print_keys_separated_by_space<K, V>(map: &BTreeMap<K, V>)
+where
+    K: std::fmt::Display,
+{
+    let mut first = true;
+    for key in map.keys() {
+        if first {
+            print!("{}", key);
+            first = false;
+        } else {
+            print!(" {}", key);
+        }
     }
-
-    if len_before == map.len() {
-        return Err(Error::AliasOfDirectoryXNotFound(
-            value.to_string_lossy().to_string(),
-        ));
-    }
-
-    Ok(())
+    println!();
 }

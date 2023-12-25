@@ -4,10 +4,10 @@ mod app;
 mod error;
 mod normalize;
 mod process_subcommand;
-mod toml_parser;
+mod aliases_dirs;
 mod util;
 use crate::error::Result;
-use crate::toml_parser::AliasesDirs;
+use crate::aliases_dirs::AliasesDirs;
 use dirs;
 use error::Error;
 use std::env;
@@ -41,7 +41,7 @@ fn run() -> Result<()> {
         ));
     }
 
-    let mut ads: AliasesDirs = {
+    let mut ad: AliasesDirs = {
         let toml_str = util::read_contents_file(&shmarks_file_path).map_err(|err| {
             format!(
                 "Failed reading '{}': {}",
@@ -58,7 +58,7 @@ fn run() -> Result<()> {
             )
         })?;
 
-        toml_parser::to_btreemap(&toml).map_err(|err| {
+        aliases_dirs::to_btreemap(&toml).map_err(|err| {
             format!(
                 "Failed processing toml from '{}': {}",
                 shmarks_file_path.to_str().unwrap(),
@@ -67,9 +67,9 @@ fn run() -> Result<()> {
         })?
     };
 
-    fn replace_contents_of_toml(ads: &AliasesDirs, shmarks_file_path: &PathBuf) -> Result<()> {
+    fn replace_contents_of_toml(ad: &AliasesDirs, shmarks_file_path: &PathBuf) -> Result<()> {
         let toml_new_string = toml::to_string_pretty(
-            &toml_parser::to_toml(&ads)
+            &aliases_dirs::to_toml(&ad)
         )?;
     
         util::replace_contents_of_file(&shmarks_file_path, &toml_new_string).map_err(|e| {
@@ -83,15 +83,15 @@ fn run() -> Result<()> {
 
     match matches.subcommand() {
         Some(("new", sub_m)) => {
-            process_subcommand::new(&sub_m, &mut ads)?;
-            replace_contents_of_toml(&ads, &shmarks_file_path)?;
+            process_subcommand::new(&sub_m, &mut ad)?;
+            replace_contents_of_toml(&ad, &shmarks_file_path)?;
         }
         Some(("rm", sub_m)) => {
-            process_subcommand::rm(&sub_m, &mut ads)?;
-            replace_contents_of_toml(&ads, &shmarks_file_path)?;
+            process_subcommand::rm(&sub_m, &mut ad)?;
+            replace_contents_of_toml(&ad, &shmarks_file_path)?;
         }
-        Some(("ls", sub_m)) => process_subcommand::ls(&sub_m, &mut ads),
-        _ => process_subcommand::none(&matches, &ads, &shmarks_file_path)?,
+        Some(("ls", sub_m)) => process_subcommand::ls(&sub_m, &mut ad),
+        _ => process_subcommand::none(&matches, &ad, &shmarks_file_path)?,
     }
 
     Ok(())
