@@ -3,7 +3,7 @@ use std::{collections::BTreeMap, path::PathBuf};
 
 pub type AliasesDirs = BTreeMap<String, PathBuf>;
 
-pub fn to_btreemap(toml: &toml::Value) -> Result<AliasesDirs> {
+pub fn from_toml(toml: &toml::Value) -> Result<AliasesDirs> {
     if let toml::Value::Table(table) = toml {
         let mut ad: AliasesDirs = BTreeMap::new();
 

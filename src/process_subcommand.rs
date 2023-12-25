@@ -1,6 +1,7 @@
 use crate::aliases_dirs::AliasesDirs;
 use crate::error::{Error, Result};
 use crate::{aliases_dirs, normalize, util};
+use crate::app;
 use clap::ArgMatches;
 use std::env;
 use std::path::PathBuf;
@@ -14,7 +15,7 @@ pub fn ls(m: &ArgMatches, ad: &mut AliasesDirs) {
 
     // Simple print like "a1 a2 a3\n"
 
-    if !m.get_flag("directory") {
+    if !m.get_flag(app::ARG_DIRECTORY) {
         util::print_keys_separated_by_space(ad);
         return;
     }
@@ -44,7 +45,7 @@ pub fn ls(m: &ArgMatches, ad: &mut AliasesDirs) {
 }
 
 pub fn rm(m: &ArgMatches, ad: &mut AliasesDirs) -> Result<()> {
-    if let Some(alias) = m.get_one::<String>("alias") {
+    if let Some(alias) = m.get_one::<String>(app::ARG_ALIAS) {
         if ad.contains_key(alias) {
             ad.remove(alias);
             return Ok(());
@@ -54,7 +55,7 @@ pub fn rm(m: &ArgMatches, ad: &mut AliasesDirs) -> Result<()> {
     }
 
     let dir = {
-        if let Some(directory) = m.get_one::<PathBuf>("directory") {
+        if let Some(directory) = m.get_one::<PathBuf>(app::ARG_DIRECTORY) {
             normalize::abs_normalize_path(&directory)?
         } else {
             env::current_dir()? // By default current dir is used
@@ -67,18 +68,19 @@ pub fn rm(m: &ArgMatches, ad: &mut AliasesDirs) -> Result<()> {
 }
 
 pub fn new(m: &ArgMatches, ad: &mut AliasesDirs) -> Result<()> {
-    let alias_arg = m.get_one::<String>("alias").unwrap();
+    let alias_arg = m.get_one::<String>(app::ARG_ALIAS).unwrap();
     let absolute_path_arg = {
-        let path_arg = m.get_one::<PathBuf>("directory").unwrap();
+        let path_arg = m.get_one::<PathBuf>(app::ARG_DIRECTORY).unwrap();
         normalize::abs_normalize_path(path_arg)?
     };
 
     ad.insert(alias_arg.to_string(), absolute_path_arg);
+    
     Ok(())
 }
 
 pub fn none(m: &ArgMatches, ad: &AliasesDirs, shmarks_file_path: &PathBuf) -> Result<()> {
-    if let Some(alias) = m.get_one::<String>("alias") {
+    if let Some(alias) = m.get_one::<String>(app::ARG_ALIAS) {
         let dir_to_set = ad.get(alias);
         if let Some(dir) = dir_to_set {
             println!("{}", dir.to_string_lossy());
@@ -88,7 +90,7 @@ pub fn none(m: &ArgMatches, ad: &AliasesDirs, shmarks_file_path: &PathBuf) -> Re
         return Err(Error::AliasNotFound(alias.to_string()));
     }
 
-    if m.get_flag("edit") {
+    if m.get_flag(app::ARG_EDIT) {
         let editor = env::var("EDITOR").unwrap_or_else(|_| String::from("vi"));
         process::Command::new(&editor)
             .arg(&shmarks_file_path)
