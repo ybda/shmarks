@@ -17,6 +17,8 @@ const ARG_ALIAS_SHORT: char = 'a';
 
 pub fn matches() -> ArgMatches {
     command!()
+        .args_conflicts_with_subcommands(true)
+        .max_term_width(100)
         .about("Directory bookmarks for the shell")
         .arg(
             Arg::new(ARG_ALIAS)

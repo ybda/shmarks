@@ -6,7 +6,8 @@ shmarks
 $ shmarks --help
 Directory bookmarks for the shell
 
-Usage: shmarks [OPTIONS] [COMMAND]
+Usage: shmarks [OPTIONS]
+       shmarks <COMMAND>
 
 Commands:
   new   Create new mark [aliases: n]
@@ -16,7 +17,7 @@ Commands:
 
 Options:
   -a, --alias <alias>  Alias of the directory to jump into
-  -e, --edit           Edit marks in $EDITOR
+  -e, --edit           Edit marks in '$EDITOR'
   -h, --help           Print help
   -V, --version        Print version
 ```
