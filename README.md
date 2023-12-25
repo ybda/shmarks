@@ -23,6 +23,8 @@ Options:
 
 ## Code to add in your .zshrc (should work with little changes in other shells as well)
 ```
+alias s='shmarks'
+alias p='s l -d'  # Aesthetic print
 export SHMARKS_LIST_FILE="$HOME/.config/mylinuxcfg/shmarks.toml"
 f() {
     if [[ $# -eq 0 ]]; then
