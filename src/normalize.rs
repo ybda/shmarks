@@ -1,7 +1,11 @@
 use crate::error::Result;
 use std::path::{Path, PathBuf};
 
-pub fn normalize_path<P: AsRef<Path>>(path: P) -> PathBuf {
+pub fn abs_normalize_path<P: AsRef<Path>>(path: P) -> Result<PathBuf> {
+    Ok(normalize_path(std::path::absolute(path)?))
+}
+
+fn normalize_path<P: AsRef<Path>>(path: P) -> PathBuf {
     let mut normalized = if path.as_ref().is_absolute() {
         PathBuf::from("/")
     } else {
@@ -17,14 +21,6 @@ pub fn normalize_path<P: AsRef<Path>>(path: P) -> PathBuf {
         }
     }
     normalized
-}
-
-pub fn abs_normalize_path(path: &PathBuf) -> Result<PathBuf> {
-    let path_str = path.to_str().unwrap();
-    if path_str == "." || path_str == ".." {
-        return Ok(std::fs::canonicalize(path)?);
-    }
-    Ok(normalize_path(std::path::absolute(path)?))
 }
 
 #[cfg(test)]

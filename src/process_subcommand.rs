@@ -1,10 +1,11 @@
 use crate::aliases_dirs::AliasesDirs;
+use crate::app;
+use crate::constants::{DEFAULT_ALIAS_NAME, LS_COLOR};
 use crate::error::{Error, Result};
 use crate::{aliases_dirs, normalize, util};
-use crate::app;
 use clap::ArgMatches;
 use std::env;
-use std::path::{PathBuf, Path};
+use std::path::{Path, PathBuf};
 use std::process;
 
 pub fn ls(m: &ArgMatches, ad: &mut AliasesDirs) {
@@ -22,13 +23,13 @@ pub fn ls(m: &ArgMatches, ad: &mut AliasesDirs) {
 
     // Colored print in two columns
 
-    let max_alias_length = ad.keys().map(|s| s.len()).max().unwrap_or(0); 
+    let max_alias_length = ad.keys().map(|s| s.len()).max().unwrap_or(0);
 
     if max_alias_length == 0 {
         return;
     }
 
-    let alias_style = nu_ansi_term::Color::LightGreen.bold();
+    let alias_style = LS_COLOR.bold();
     let alias_style_len = alias_style.paint(".").to_string().len() - 1;
 
     const MIN_NUMBER_OF_SPACES: usize = 3;
@@ -71,14 +72,14 @@ pub fn new(m: &ArgMatches, ad: &mut AliasesDirs) -> Result<()> {
     let alias_arg = m.get_one::<String>(app::ARG_ALIAS).unwrap();
 
     aliases_dirs::validate_alias_name(alias_arg)?;
-    
+
     let absolute_path_arg = {
         let path_arg = m.get_one::<PathBuf>(app::ARG_DIRECTORY).unwrap();
         normalize::abs_normalize_path(path_arg)?
     };
 
     ad.insert(alias_arg.to_string(), absolute_path_arg);
-    
+
     Ok(())
 }
 
@@ -110,15 +111,14 @@ pub fn none(m: &ArgMatches, ad: &AliasesDirs, shmarks_file_path: &Path) -> Resul
         return Ok(());
     }
 
-    let default_alias_name = "DEFAULT";
-    if let Some(dir) = ad.get(default_alias_name) {
+    if let Some(dir) = ad.get(DEFAULT_ALIAS_NAME) {
         println!("{}", dir.to_string_lossy());
 
         return Ok(());
-    } 
-    
+    }
+
     Err(Error::from(format!(
         "No default directory was set, add alias '{}' to cd into default directory",
-        default_alias_name
+        DEFAULT_ALIAS_NAME
     )))
 }

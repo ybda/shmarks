@@ -17,6 +17,15 @@ pub fn replace_contents_of_file(path: &Path, contents: &str) -> Result<()> {
     Ok(())
 }
 
+pub fn create_file_if_not_exists(filepath: &Path) -> Result<()> {
+    if !filepath.exists() {
+        File::create(&filepath)
+            .map_err(|err| format!("Failed creating '{}': {}", &filepath.to_string_lossy(), err))?;
+    }
+
+    Ok(())
+}
+
 pub fn print_keys_separated_by_space<K, V>(map: &BTreeMap<K, V>)
 where
     K: std::fmt::Display,

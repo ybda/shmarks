@@ -26,7 +26,7 @@ Options:
 ```
 alias s='shmarks'
 alias p='s l -d'  # Aesthetic print
-export SHMARKS_LIST_FILE="$HOME/.config/mylinuxcfg/shmarks.toml"
+export SHMARKS_LIST_PATH="$HOME/.config/shmarks.toml"
 f() {
     if [[ $# -eq 0 ]]; then
         cd "$(shmarks)"
@@ -98,7 +98,7 @@ List all saved marks like "/bin/ls -l" in column with dirs showed
 ```
 
 ## Note
-- By default shmarks.toml located in your_config_dir/shmarks.toml. You could override it with $SHMARKS_LIST_FILE
+- By default shmarks.toml located in your_user_local_config_dir/shmarks.toml. You could override it with $SHMARKS_LIST_PATH
 - It requires nightly Rust only because of the "std::path::absolute" 
 
 ## Inspired by
