@@ -1,11 +1,11 @@
-use crate::aliases_dirs::AliasesDirs;
+use crate::alias_dirs::AliasDirs;
 use crate::cli::{Cli, LsOpts, NewOpts, RmOpts};
 use crate::constants::LS_COLOR;
 use crate::error::{Error, Result};
-use crate::{aliases_dirs, normalize, util};
+use crate::{alias_dirs, normalize, util};
 use std::borrow::Cow;
 
-pub fn ls(opts: &LsOpts, ad: &mut AliasesDirs) {
+pub fn ls(opts: &LsOpts, ad: &mut AliasDirs) {
     if ad.keys().len() == 0 {
         return;
     }
@@ -19,7 +19,7 @@ pub fn ls(opts: &LsOpts, ad: &mut AliasesDirs) {
     }
 }
 
-pub fn rm(opts: &RmOpts, ad: &mut AliasesDirs) -> Result<()> {
+pub fn rm(opts: &RmOpts, ad: &mut AliasDirs) -> Result<()> {
     if let Some(alias) = &opts.alias {
         if ad.contains_key(alias) {
             ad.remove(alias);
@@ -38,13 +38,13 @@ pub fn rm(opts: &RmOpts, ad: &mut AliasesDirs) -> Result<()> {
         }
     };
 
-    aliases_dirs::remove_elements_by_value(ad, &dir)?;
+    alias_dirs::remove_elements_by_value(ad, &dir)?;
 
     Ok(())
 }
 
-pub fn new(opts: &NewOpts, ad: &mut AliasesDirs) -> Result<()> {
-    aliases_dirs::validate_alias_name(&opts.alias)?;
+pub fn new(opts: &NewOpts, ad: &mut AliasDirs) -> Result<()> {
+    alias_dirs::validate_alias_name(&opts.alias)?;
 
     let dir = if let Some(dir) = &opts.directory {
         Cow::Borrowed(dir)
@@ -59,7 +59,7 @@ pub fn new(opts: &NewOpts, ad: &mut AliasesDirs) -> Result<()> {
     Ok(())
 }
 
-pub fn none(cli: &Cli, ad: &AliasesDirs) -> Result<()> {
+pub fn none(cli: &Cli, ad: &AliasDirs) -> Result<()> {
     if let Some(alias) = &cli.alias {
         let dir_to_set = ad.get(alias);
         if let Some(dir) = dir_to_set {

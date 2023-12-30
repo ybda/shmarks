@@ -2,7 +2,7 @@
 
 use std::fs::File;
 use clap::Parser;
-mod aliases_dirs;
+mod alias_dirs;
 mod cli;
 mod constants;
 mod error;
@@ -10,7 +10,7 @@ mod normalize;
 mod process_subcommand;
 mod shmarks_file;
 mod util;
-use crate::aliases_dirs::AliasesDirs;
+use crate::alias_dirs::AliasDirs;
 use crate::cli::{Cli, Commands};
 use crate::error::Result;
 use std::path::Path;
@@ -31,14 +31,14 @@ fn run() -> Result<()> {
             .map_err(|err| format!("Failed creating '{}': {}", &shmarks_filepath.to_string_lossy(), err))?;
     }
 
-    let mut ad: AliasesDirs = shmarks_file::parse(&shmarks_filepath)?;
+    let mut ad: AliasDirs = shmarks_file::parse(&shmarks_filepath)?;
 
     process_args(&mut ad, &shmarks_filepath)?;
 
     Ok(())
 }
 
-fn process_args<P: AsRef<Path>>(ad: &mut AliasesDirs, shmarks_filepath: P) -> Result<()> {
+fn process_args<P: AsRef<Path>>(ad: &mut AliasDirs, shmarks_filepath: P) -> Result<()> {
     let opts = Cli::parse();
 
     match opts.command {

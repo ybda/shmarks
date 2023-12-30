@@ -3,7 +3,7 @@ use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::io::Write;
 
-use crate::aliases_dirs::{self, AliasesDirs};
+use crate::alias_dirs::{self, AliasDirs};
 use crate::constants::{ENV_VAR_SHMARKS_LIST_PATH, SHMARKS_DEFAULT_FILENAME};
 use crate::error::{Error, Result};
 use crate::util;
@@ -24,7 +24,7 @@ pub fn retrieve_filepath() -> Result<PathBuf> {
     )
 }
 
-pub fn parse<P: AsRef<Path>>(shmarks_filepath: P) -> Result<AliasesDirs> {
+pub fn parse<P: AsRef<Path>>(shmarks_filepath: P) -> Result<AliasDirs> {
     let toml: toml::Value = {
         let toml_str = util::read_file_contents(&shmarks_filepath)?;
 
@@ -37,7 +37,7 @@ pub fn parse<P: AsRef<Path>>(shmarks_filepath: P) -> Result<AliasesDirs> {
         })?
     };
     Ok({
-        aliases_dirs::from_toml(&toml).map_err(|err| {
+        alias_dirs::from_toml(&toml).map_err(|err| {
             format!(
                 "Failed processing toml from '{}': {}",
                 shmarks_filepath.as_ref().to_str().unwrap(),
@@ -47,12 +47,12 @@ pub fn parse<P: AsRef<Path>>(shmarks_filepath: P) -> Result<AliasesDirs> {
     })
 }
 
-pub fn update<P: AsRef<Path>>(shmarks_filepath: P, ad: &AliasesDirs) -> Result<()> {
+pub fn update<P: AsRef<Path>>(shmarks_filepath: P, ad: &AliasDirs) -> Result<()> {
     // Truncate file
     let mut truncated_file = File::create(shmarks_filepath.as_ref())
         .map_err(|err| format!("Failed truncating '{}': {}", shmarks_filepath.as_ref().to_string_lossy(), err))?;
 
-    let updated_shmarks_toml_str = toml::to_string_pretty(&aliases_dirs::to_toml(&ad))?;
+    let updated_shmarks_toml_str = toml::to_string_pretty(&alias_dirs::to_toml(&ad))?;
 
     truncated_file.write_all(updated_shmarks_toml_str.as_bytes()).map_err(|err| {
         format!("Failed writing into '{}': {}", shmarks_filepath.as_ref().to_string_lossy(), err)

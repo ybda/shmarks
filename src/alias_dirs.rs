@@ -4,11 +4,11 @@ use std::{
     path::{Path, PathBuf},
 };
 
-pub type AliasesDirs = BTreeMap<String, PathBuf>;
+pub type AliasDirs = BTreeMap<String, PathBuf>;
 
-pub fn from_toml(toml: &toml::Value) -> Result<AliasesDirs> {
+pub fn from_toml(toml: &toml::Value) -> Result<AliasDirs> {
     if let toml::Value::Table(table) = toml {
-        let mut ad: AliasesDirs = BTreeMap::new();
+        let mut ad = AliasDirs::new();
 
         for (key, value) in table {
             if let toml::Value::String(string_value) = value {
@@ -22,7 +22,7 @@ pub fn from_toml(toml: &toml::Value) -> Result<AliasesDirs> {
     }
 }
 
-pub fn to_toml(ad: &AliasesDirs) -> toml::Value {
+pub fn to_toml(ad: &AliasDirs) -> toml::Value {
     let mut table = toml::value::Table::new();
 
     for (key, value) in ad {
@@ -35,7 +35,7 @@ pub fn to_toml(ad: &AliasesDirs) -> toml::Value {
     toml::Value::Table(table)
 }
 
-pub fn remove_elements_by_value<P: AsRef<Path>>(ad: &mut AliasesDirs, value: P) -> Result<()> {
+pub fn remove_elements_by_value<P: AsRef<Path>>(ad: &mut AliasDirs, value: P) -> Result<()> {
     let len_before = ad.len();
 
     {
