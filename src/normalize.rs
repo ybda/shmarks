@@ -7,7 +7,7 @@ pub fn abs_normalize_path<P: AsRef<Path>>(path: P) -> Result<PathBuf> {
 
 fn normalize_path<P: AsRef<Path>>(path: P) -> PathBuf {
     let mut normalized = if path.as_ref().is_absolute() {
-        PathBuf::from("/")
+        PathBuf::from(path.as_ref().iter().next().unwrap())
     } else {
         PathBuf::new()
     };
