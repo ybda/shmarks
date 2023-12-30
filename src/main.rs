@@ -25,18 +25,19 @@ fn main() {
 }
 
 fn run() -> Result<()> {
-    let shmarks_filepath =
-        if let Some(fp) = env::var_os(ENV_VAR_SHMARKS_LIST_PATH).map(PathBuf::from) {
-            fp
-        } else {
-            let default_dir = dirs::config_local_dir().ok_or_else(|| {
-                Error::from(format!(
-                    "Failed to resolve default config directory. Set '{}' environment variable",
-                    ENV_VAR_SHMARKS_LIST_PATH
-                ))
-            })?;
-            default_dir.join(SHMARKS_DEFAULT_FILENAME)
-        };
+    let shmarks_filepath = if let Some(fp) =
+        env::var_os(ENV_VAR_SHMARKS_LIST_PATH).map(PathBuf::from)
+    {
+        fp
+    } else {
+        let default_dir = dirs::data_local_dir().ok_or_else(|| {
+            Error::from(format!(
+                "Failed to resolve default directory for shmarks. Set '{}' environment variable",
+                ENV_VAR_SHMARKS_LIST_PATH
+            ))
+        })?;
+        default_dir.join(SHMARKS_DEFAULT_FILENAME)
+    };
 
     util::create_file_if_not_exists(&shmarks_filepath)?;
 

@@ -25,8 +25,8 @@ Options:
 ## Code to add in your .zshrc (should work with little changes in other shells as well)
 ```
 alias s='shmarks'
-alias p='s l -d'  # Aesthetic print
-export SHMARKS_LIST_PATH="$HOME/.config/shmarks.toml"
+alias p='shmarks l -d'  # Aesthetic print
+export SHMARKS_LIST_PATH="$HOME/.local/share"
 f() {
     if [[ $# -eq 0 ]]; then
         cd "$(shmarks -a DEFAULT)"
@@ -104,7 +104,7 @@ List all saved marks like "/bin/ls -l" in column with dirs showed
 ```
 
 ## Note
-- By default shmarks.toml located in your_user_local_config_dir/shmarks.toml. You could override it with $SHMARKS_LIST_PATH
+- By default shmarks.toml located in $XDG_DATA_HOME or $HOME/.local/share. You could override it with $SHMARKS_LIST_PATH
 - It requires nightly Rust only because of the "std::path::absolute" 
 
 ## Inspired by
