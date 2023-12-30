@@ -20,7 +20,6 @@ pub fn matches() -> ArgMatches {
         .args_conflicts_with_subcommands(true)
         .arg_required_else_help(true)
         .max_term_width(100)
-        .about("Directory bookmarks for the shell")
         .arg(
             Arg::new(ARG_ALIAS)
                 .long(ARG_ALIAS)
