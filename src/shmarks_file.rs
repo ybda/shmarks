@@ -24,13 +24,7 @@ pub fn retrieve_filepath() -> Result<PathBuf> {
 
 pub fn parse(shmarks_filepath: &Path) -> Result<AliasesDirs> {
     let toml: toml::Value = {
-        let toml_str = util::read_file_contents(&shmarks_filepath).map_err(|err| {
-            format!(
-                "Failed reading '{}': {}",
-                shmarks_filepath.to_str().unwrap(),
-                err
-            )
-        })?;
+        let toml_str = util::read_file_contents(&shmarks_filepath)?;
 
         toml::from_str(&toml_str).map_err(|err| {
             format!(

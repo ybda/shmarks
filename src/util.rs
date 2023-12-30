@@ -10,10 +10,14 @@ pub fn current_dir() -> Result<PathBuf> {
 }
 
 pub fn read_file_contents(filepath: &Path) -> Result<String> {
-    let mut toml_str = String::new();
-    let mut file = File::open(filepath)?;
-    file.read_to_string(&mut toml_str)?;
-    Ok(toml_str)
+    let mut str = String::new();
+    let mut file = File::open(filepath).map_err(|err| {
+        format!("Failed opening '{}': {}", filepath.to_string_lossy(), err)
+    })?;
+    file.read_to_string(&mut str).map_err(|err| {
+        format!("Failed reading '{}': {}", filepath.to_string_lossy(), err)
+    })?;
+    Ok(str)
 }
 
 pub fn replace_contents_of_file(path: &Path, contents: &str) -> Result<()> {
