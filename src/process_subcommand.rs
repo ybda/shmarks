@@ -1,6 +1,6 @@
 use crate::aliases_dirs::AliasesDirs;
 use crate::app;
-use crate::constants::{DEFAULT_ALIAS_NAME, LS_COLOR};
+use crate::constants::LS_COLOR;
 use crate::error::{Error, Result};
 use crate::{aliases_dirs, normalize, util};
 use clap::ArgMatches;
@@ -59,7 +59,8 @@ pub fn rm(m: &ArgMatches, ad: &mut AliasesDirs) -> Result<()> {
         if let Some(directory) = m.get_one::<PathBuf>(app::ARG_DIRECTORY) {
             normalize::abs_normalize_path(&directory)?
         } else {
-            env::current_dir()? // By default current dir is used
+            // By default current dir is used
+            env::current_dir()?
         }
     };
 
@@ -88,6 +89,7 @@ pub fn none(m: &ArgMatches, ad: &AliasesDirs, shmarks_file_path: &Path) -> Resul
         let dir_to_set = ad.get(alias);
         if let Some(dir) = dir_to_set {
             println!("{}", dir.to_string_lossy());
+
             return Ok(());
         }
 
@@ -111,14 +113,6 @@ pub fn none(m: &ArgMatches, ad: &AliasesDirs, shmarks_file_path: &Path) -> Resul
         return Ok(());
     }
 
-    if let Some(dir) = ad.get(DEFAULT_ALIAS_NAME) {
-        println!("{}", dir.to_string_lossy());
-
-        return Ok(());
-    }
-
-    Err(Error::from(format!(
-        "No default directory was set, add alias '{}' to cd into default directory",
-        DEFAULT_ALIAS_NAME
-    )))
+    // Shouldn't happen because arg_required_else_help(true) is set
+    Err(Error::from(format!("No args were provided")))
 }

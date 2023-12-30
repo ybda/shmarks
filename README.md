@@ -29,7 +29,7 @@ alias p='s l -d'  # Aesthetic print
 export SHMARKS_LIST_PATH="$HOME/.config/shmarks.toml"
 f() {
     if [[ $# -eq 0 ]]; then
-        cd "$(shmarks)"
+        cd "$(shmarks -a DEFAULT)"
     else
         cd "$(shmarks -a "$@")"
     fi
@@ -42,6 +42,12 @@ compctl -K _shmarks_compzsh f
 ```
 
 ## How to use
+
+Jump by alias DEFAULT into default dir
+
+```bash
+> f
+```
 
 Jump by alias
 
