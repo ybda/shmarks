@@ -1,5 +1,6 @@
 #![feature(absolute_path)]
 
+use std::fs::File;
 use clap::Parser;
 mod aliases_dirs;
 mod cli;
@@ -25,7 +26,10 @@ fn main() {
 fn run() -> Result<()> {
     let shmarks_filepath = shmarks_file::retrieve_filepath()?;
 
-    util::create_file_if_not_exists(&shmarks_filepath)?;
+    if !shmarks_filepath.exists() {
+        File::create(&shmarks_filepath)
+            .map_err(|err| format!("Failed creating '{}': {}", &shmarks_filepath.to_string_lossy(), err))?;
+    }
 
     let mut ad: AliasesDirs = shmarks_file::parse(&shmarks_filepath)?;
 
@@ -34,17 +38,17 @@ fn run() -> Result<()> {
     Ok(())
 }
 
-fn process_args(ad: &mut AliasesDirs, shmarks_filepath: &Path) -> Result<()> {
+fn process_args<P: AsRef<Path>>(ad: &mut AliasesDirs, shmarks_filepath: P) -> Result<()> {
     let opts = Cli::parse();
 
     match opts.command {
         Some(Commands::New(opts)) => {
             process_subcommand::new(&opts, ad)?;
-            shmarks_file::update(shmarks_filepath, ad)?;
+            shmarks_file::update(shmarks_filepath.as_ref(), ad)?;
         }
         Some(Commands::Rm(opts)) => {
             process_subcommand::rm(&opts, ad)?;
-            shmarks_file::update(shmarks_filepath, ad)?;
+            shmarks_file::update(shmarks_filepath.as_ref(), ad)?;
         }
         Some(Commands::Ls(opts)) => process_subcommand::ls(&opts, ad),
         _ => process_subcommand::none(&opts, &ad)?,

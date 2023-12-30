@@ -10,30 +10,12 @@ pub fn ls(opts: &LsOpts, ad: &mut AliasesDirs) {
         return;
     }
 
-    // Simple print like "a1 a2 a3\n"
-
-    if !opts.directory {
+    if opts.directory {
+        // Colored print in two columns
+        util::print_keys_long_colored(ad, LS_COLOR.bold(), 3);
+    } else {
+        // Simple print like "a1 a2 a3\n"
         util::print_keys_separated_by_space(ad);
-        return;
-    }
-
-    // Colored print in two columns
-
-    let max_alias_length = ad.keys().map(|s| s.len()).max().unwrap_or(0);
-
-    let alias_style = LS_COLOR.bold();
-    let alias_style_len = alias_style.paint(".").to_string().len() - 1;
-
-    const MIN_NUMBER_OF_SPACES: usize = 3;
-
-    let padding = max_alias_length + alias_style_len + MIN_NUMBER_OF_SPACES;
-    for alias in ad.keys() {
-        println!(
-            "{:<width$}{}",
-            alias_style.paint(alias).to_string(),
-            ad[alias].to_string_lossy(),
-            width = padding
-        );
     }
 }
 
@@ -52,7 +34,7 @@ pub fn rm(opts: &RmOpts, ad: &mut AliasesDirs) -> Result<()> {
             normalize::abs_normalize_path(&dir)?
         } else {
             // By default current dir is used
-            util::current_dir()?
+            util::retrieve_env_current_dir()?
         }
     };
 
@@ -67,10 +49,10 @@ pub fn new(opts: &NewOpts, ad: &mut AliasesDirs) -> Result<()> {
     let dir = if let Some(dir) = &opts.directory {
         Cow::Borrowed(dir)
     } else {
-        Cow::Owned(util::current_dir()?)
+        Cow::Owned(util::retrieve_env_current_dir()?)
     };
 
-    let absolute_path_arg = { normalize::abs_normalize_path(dir.as_ref())? };
+    let absolute_path_arg = normalize::abs_normalize_path(dir.as_ref())?;
 
     ad.insert(opts.alias.clone(), absolute_path_arg);
 
@@ -90,5 +72,5 @@ pub fn none(cli: &Cli, ad: &AliasesDirs) -> Result<()> {
     }
 
     // Shouldn't happen because arg_required_else_help(true) is set
-    Err(Error::from(format!("No args were provided")))
+    Err(Error::from("No args were provided"))
 }

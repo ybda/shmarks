@@ -35,17 +35,17 @@ pub fn to_toml(ad: &AliasesDirs) -> toml::Value {
     toml::Value::Table(table)
 }
 
-pub fn remove_elements_by_value(ad: &mut AliasesDirs, value: &Path) -> Result<()> {
+pub fn remove_elements_by_value<P: AsRef<Path>>(ad: &mut AliasesDirs, value: P) -> Result<()> {
     let len_before = ad.len();
 
     {
-        let value_str = value.to_str().unwrap();
+        let value_str = value.as_ref().to_str().unwrap();
         ad.retain(|_, v| v.to_str().unwrap() != value_str);
     }
 
     if len_before == ad.len() {
         return Err(Error::AliasOfDirectoryXNotFound(
-            value.to_string_lossy().to_string(),
+            value.as_ref().to_string_lossy().to_string(),
         ));
     }
 
