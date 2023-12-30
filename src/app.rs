@@ -1,5 +1,5 @@
 use clap::Command;
-use clap::{command, Arg, ArgMatches};
+use clap::{command, Arg, ArgMatches, ValueHint};
 use std::env;
 use std::path::PathBuf;
 
@@ -25,65 +25,70 @@ pub fn matches() -> ArgMatches {
                 .long(ARG_ALIAS)
                 .short(ARG_ALIAS_SHORT)
                 .exclusive(true)
-                .help("Alias of the directory to jump into"),
+                .help("Alias of the directory to jump into.")
+                .value_hint(ValueHint::Other),
         )
         .arg(
             Arg::new(ARG_EDIT)
                 .long(ARG_EDIT)
                 .short(ARG_EDIT_SHORT)
-                .help("Edit marks in '$EDITOR'")
+                .help("Edit marks in '$EDITOR'.")
                 .exclusive(true)
                 .num_args(0),
         )
         .subcommand(
             Command::new(SUBCOMMAND_NEW)
                 .visible_alias("n")
-                .about("Create new mark")
+                .about("Create new mark.")
                 .arg(
                     Arg::new(ARG_ALIAS)
                         .required(true)
-                        .help("Alias of the directory to create"),
+                        .help("Alias of the directory to create.")
+                        .value_hint(ValueHint::Other),
                 )
                 .arg(
                     Arg::new(ARG_DIRECTORY)
                         .long(ARG_DIRECTORY)
                         .short(ARG_DIRECTORY_SHORT)
                         .value_parser(clap::value_parser!(PathBuf))
-                        .help("Directory to mark")
-                        .default_value("."),
+                        .help("Directory to mark.")
+                        .default_value(".")
+                        .value_hint(ValueHint::DirPath),
                 ),
         )
         .subcommand(
             Command::new(SUBCOMMAND_RM)
                 .visible_alias("r")
-                .about("Remove mark. Removes mark of current dir if no options provided")
+                .about("Remove mark. Removes mark of the current dir if no args provided.")
                 .alias("remove")
                 .arg(
                     Arg::new(ARG_ALIAS)
                         .long(ARG_ALIAS)
                         .short(ARG_ALIAS_SHORT)
-                        .help("Alias of the directory to remove")
-                        .conflicts_with("directory"),
+                        .help("Alias of the directory to remove.")
+                        .conflicts_with("directory")
+                        .value_hint(ValueHint::Other),
                 )
                 .arg(
                     Arg::new(ARG_DIRECTORY)
                         .long(ARG_DIRECTORY)
                         .short(ARG_DIRECTORY_SHORT)
                         .value_parser(clap::value_parser!(PathBuf))
-                        .help("Directory to remove")
-                        .conflicts_with("alias"),
+                        .help("Directory to remove.")
+                        .conflicts_with("alias")
+                        .value_hint(ValueHint::DirPath),
                 ),
         )
         .subcommand(
             Command::new(SUBCOMMAND_LS)
                 .visible_alias("l")
-                .about("List all marks")
+                .about("List all marks.")
                 .alias("list")
                 .arg(
                     Arg::new(ARG_DIRECTORY)
                         .long(ARG_DIRECTORY)
                         .short(ARG_DIRECTORY_SHORT)
-                        .help("Print directories as well")
+                        .help("Print directories as well.")
                         .num_args(0),
                 ),
         )
