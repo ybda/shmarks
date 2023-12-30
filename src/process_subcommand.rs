@@ -1,22 +1,18 @@
 use crate::aliases_dirs::AliasesDirs;
-use crate::app;
+use crate::cli::{Cli, LsOpts, NewOpts, RmOpts};
 use crate::constants::LS_COLOR;
 use crate::error::{Error, Result};
 use crate::{aliases_dirs, normalize, util};
-use clap::ArgMatches;
-use std::env;
-use std::path::{Path, PathBuf};
-use std::process;
+use std::borrow::Cow;
 
-pub fn ls(m: &ArgMatches, ad: &mut AliasesDirs) {
-    let keys_len = ad.keys().len();
-    if keys_len == 0 {
+pub fn ls(opts: &LsOpts, ad: &mut AliasesDirs) {
+    if ad.keys().len() == 0 {
         return;
     }
 
     // Simple print like "a1 a2 a3\n"
 
-    if !m.get_flag(app::ARG_DIRECTORY) {
+    if !opts.directory {
         util::print_keys_separated_by_space(ad);
         return;
     }
@@ -24,10 +20,6 @@ pub fn ls(m: &ArgMatches, ad: &mut AliasesDirs) {
     // Colored print in two columns
 
     let max_alias_length = ad.keys().map(|s| s.len()).max().unwrap_or(0);
-
-    if max_alias_length == 0 {
-        return;
-    }
 
     let alias_style = LS_COLOR.bold();
     let alias_style_len = alias_style.paint(".").to_string().len() - 1;
@@ -45,8 +37,8 @@ pub fn ls(m: &ArgMatches, ad: &mut AliasesDirs) {
     }
 }
 
-pub fn rm(m: &ArgMatches, ad: &mut AliasesDirs) -> Result<()> {
-    if let Some(alias) = m.get_one::<String>(app::ARG_ALIAS) {
+pub fn rm(opts: &RmOpts, ad: &mut AliasesDirs) -> Result<()> {
+    if let Some(alias) = &opts.alias {
         if ad.contains_key(alias) {
             ad.remove(alias);
             return Ok(());
@@ -56,36 +48,37 @@ pub fn rm(m: &ArgMatches, ad: &mut AliasesDirs) -> Result<()> {
     }
 
     let dir = {
-        if let Some(directory) = m.get_one::<PathBuf>(app::ARG_DIRECTORY) {
-            normalize::abs_normalize_path(&directory)?
+        if let Some(dir) = &opts.directory {
+            normalize::abs_normalize_path(&dir)?
         } else {
             // By default current dir is used
-            env::current_dir()?
+            util::current_dir()?
         }
     };
 
-    aliases_dirs::remove_elements_of_aliases_dirs_by_value(ad, &dir)?;
+    aliases_dirs::remove_elements_by_value(ad, &dir)?;
 
     Ok(())
 }
 
-pub fn new(m: &ArgMatches, ad: &mut AliasesDirs) -> Result<()> {
-    let alias_arg = m.get_one::<String>(app::ARG_ALIAS).unwrap();
+pub fn new(opts: &NewOpts, ad: &mut AliasesDirs) -> Result<()> {
+    aliases_dirs::validate_alias_name(&opts.alias)?;
 
-    aliases_dirs::validate_alias_name(alias_arg)?;
-
-    let absolute_path_arg = {
-        let path_arg = m.get_one::<PathBuf>(app::ARG_DIRECTORY).unwrap();
-        normalize::abs_normalize_path(path_arg)?
+    let dir = if let Some(dir) = &opts.directory {
+        Cow::Borrowed(dir)
+    } else {
+        Cow::Owned(util::current_dir()?)
     };
 
-    ad.insert(alias_arg.to_string(), absolute_path_arg);
+    let absolute_path_arg = { normalize::abs_normalize_path(dir.as_ref())? };
+
+    ad.insert(opts.alias.clone(), absolute_path_arg);
 
     Ok(())
 }
 
-pub fn none(m: &ArgMatches, ad: &AliasesDirs, shmarks_file_path: &Path) -> Result<()> {
-    if let Some(alias) = m.get_one::<String>(app::ARG_ALIAS) {
+pub fn none(cli: &Cli, ad: &AliasesDirs) -> Result<()> {
+    if let Some(alias) = &cli.alias {
         let dir_to_set = ad.get(alias);
         if let Some(dir) = dir_to_set {
             println!("{}", dir.to_string_lossy());
@@ -94,23 +87,6 @@ pub fn none(m: &ArgMatches, ad: &AliasesDirs, shmarks_file_path: &Path) -> Resul
         }
 
         return Err(Error::AliasNotFound(alias.to_string()));
-    }
-
-    if m.get_flag(app::ARG_EDIT) {
-        let editor = env::var("EDITOR").unwrap_or_else(|_| String::from("vi"));
-        process::Command::new(&editor)
-            .arg(&shmarks_file_path)
-            .status()
-            .map_err(|err| {
-                format!(
-                    "Failed opening file '{}' in editor '{}': {}",
-                    shmarks_file_path.to_string_lossy(),
-                    editor,
-                    err
-                )
-            })?;
-
-        return Ok(());
     }
 
     // Shouldn't happen because arg_required_else_help(true) is set

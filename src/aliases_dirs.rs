@@ -1,5 +1,8 @@
 use crate::error::{Error, Result};
-use std::{collections::BTreeMap, path::{PathBuf, Path}};
+use std::{
+    collections::BTreeMap,
+    path::{Path, PathBuf},
+};
 
 pub type AliasesDirs = BTreeMap<String, PathBuf>;
 
@@ -32,10 +35,7 @@ pub fn to_toml(ad: &AliasesDirs) -> toml::Value {
     toml::Value::Table(table)
 }
 
-pub fn remove_elements_of_aliases_dirs_by_value(
-    ad: &mut AliasesDirs,
-    value: &Path,
-) -> Result<()> {
+pub fn remove_elements_by_value(ad: &mut AliasesDirs, value: &Path) -> Result<()> {
     let len_before = ad.len();
 
     {
@@ -56,7 +56,10 @@ pub fn validate_alias_name(alias_name: &str) -> Result<()> {
     let pattern = regex::Regex::new(r"^[a-zA-Z0-9_-]+$").unwrap();
 
     if !pattern.is_match(alias_name) {
-        return Err(Error::Msg(format!("Alias name is invalid: '{}'", alias_name)));
+        return Err(Error::Msg(format!(
+            "Alias name is invalid: '{}'",
+            alias_name
+        )));
     }
 
     Ok(())

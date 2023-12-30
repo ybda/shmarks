@@ -2,7 +2,12 @@ use crate::error::Result;
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::{Read, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
+
+pub fn current_dir() -> Result<PathBuf> {
+    Ok(std::env::current_dir()
+        .map_err(|err| format!("Failed retrieving current directory: {}", err))?)
+}
 
 pub fn read_file_contents(filepath: &Path) -> Result<String> {
     let mut toml_str = String::new();

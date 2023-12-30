@@ -4,20 +4,19 @@ shmarks
 # Usage
 ```
 $ shmarks --help
-Directory bookmarks for the shell
+Directory bookmarks for the shell.
 
 Usage: shmarks [OPTIONS]
        shmarks <COMMAND>
 
 Commands:
-  new   Create new mark [aliases: n]
-  rm    Remove mark. Removes mark of current dir if no options provided [aliases: r]
+  new   Create new mark. Creates mark for current directory by default [aliases: n]
+  rm    Remove mark. Removes mark of current dir if no args provided [aliases: r]
   ls    List all marks [aliases: l]
   help  Print this message or the help of the given subcommand(s)
 
 Options:
-  -a, --alias <alias>  Alias of the directory to jump into
-  -e, --edit           Edit marks in '$EDITOR'
+  -a, --alias <ALIAS>  Alias of the directory to jump into
   -h, --help           Print help
   -V, --version        Print version
 ```
@@ -25,8 +24,9 @@ Options:
 ## Code to add in your .zshrc (should work with little changes in other shells as well)
 ```
 alias s='shmarks'
-alias p='shmarks l -d'  # Aesthetic print
-export SHMARKS_LIST_PATH="$HOME/.local/share"
+alias p='shmarks ls -d' # Aesthetic print
+export SHMARKS_LIST_PATH="$HOME/.local/share/shmarks.toml"
+alias se="$EDITOR $SHMARKS_LIST_PATH" # Edit shmarks
 f() {
     if [[ $# -eq 0 ]]; then
         cd "$(shmarks -a DEFAULT)"
@@ -58,7 +58,7 @@ Jump by alias
 Edit marks file in preferred $EDITOR
 
 ```bash
-> shmarks -e 
+> se
 ```
 
 Save current dir (pwd) to shmarks
@@ -67,10 +67,14 @@ Save current dir (pwd) to shmarks
 > shmarks new myalias
 ```
 
+```bash
+> s n myalias
+```
+
 Save specified dir to shmarks 
 
 ```bash
-> shmarks new myalias -d /my/dir
+> shmarks new myalias /my/dir
 ```
 
 Remove current dir from shmarks
@@ -101,6 +105,10 @@ List all saved marks like "/bin/ls -l" in column with dirs showed
 
 ```bash
 > shmarks ls -d
+```
+
+```bash
+> p
 ```
 
 ## Note
