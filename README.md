@@ -1,6 +1,8 @@
 shmarks
 ------
 
+[![Crates.io](https://img.shields.io/crates/v/shmarks.svg)](https://crates.io/crates/shmarks)
+
 # Usage
 ```
 $ shmarks
