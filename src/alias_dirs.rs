@@ -87,11 +87,3 @@ pub fn validate_alias_name(alias_name: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn sort_by_key(ad: &mut AliasDirs) {
-    ad.sort_by(|k1, _, k2, _| k1.cmp(k2));
-}
-
-pub fn sort_by_value(ad: &mut AliasDirs) {
-    ad.sort_by(|_, value1, _, value2| value1.cmp(value2));
-}
-

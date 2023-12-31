@@ -32,6 +32,10 @@ pub struct NewOpts {
     /// Directory to mark [default: current directory]
     #[clap(value_hint = ValueHint::DirPath)]
     pub directory: Option<PathBuf>,
+
+    /// Rewrite alias if exists.
+    #[clap(short, long)]
+    pub force: bool,
 }
 
 /// Remove mark. Removes mark of current dir if no args provided.

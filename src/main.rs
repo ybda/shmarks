@@ -87,8 +87,8 @@ pub fn try_auto_sort(ad: &mut AliasDirs) {
     };
 
     if var == "a" {
-        alias_dirs::sort_by_key(ad)
+        util::sort_by_key(ad)
     } else if var == "d" {
-        alias_dirs::sort_by_value(ad)
+        util::sort_by_value(ad)
     }
 }

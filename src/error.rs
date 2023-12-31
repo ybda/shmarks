@@ -24,6 +24,9 @@ pub enum Error {
 
     #[error("Alias of directory '{0}' not found")]
     AliasOfDirectoryXNotFound(String),
+
+    #[error("Alias '{0}' already exists")]
+    AliasAlreadyExists(String),
 }
 
 impl From<&'static str> for Error {

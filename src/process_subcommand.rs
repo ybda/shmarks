@@ -3,10 +3,14 @@ use crate::constants::LS_COLOR;
 use crate::error::{Error, Result};
 use crate::{alias_dirs, normalize, util};
 use std::borrow::Cow;
-use crate::alias_dirs::{AliasDirs, sort_by_key, sort_by_value};
+use crate::alias_dirs::{AliasDirs};
 
 pub fn new(opts: &NewOpts, ad: &mut AliasDirs) -> Result<()> {
     alias_dirs::validate_alias_name(&opts.alias)?;
+
+    if !opts.force && ad.contains_key(&opts.alias) {
+        return Err(Error::AliasAlreadyExists(opts.alias.to_string()));
+    }
 
     let dir = if let Some(dir) = &opts.directory {
         Cow::Borrowed(dir)
@@ -65,9 +69,9 @@ pub fn sort(opts: &SortOpts, ad: &mut AliasDirs) {
     }
 
     if opts.directory {
-        sort_by_value(ad);
+        util::sort_by_value(ad);
     } else {
-        sort_by_key(ad);
+        util::sort_by_key(ad);
     }
 }
 

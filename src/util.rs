@@ -1,7 +1,9 @@
 use crate::error::Result;
 use std::fs::File;
+use std::hash::Hash;
 use std::io::Read;
 use std::path::{Path, PathBuf};
+use indexmap::IndexMap;
 
 pub fn retrieve_env_current_dir() -> Result<PathBuf> {
     Ok(std::env::current_dir()
@@ -19,3 +21,17 @@ pub fn read_file_contents<P: AsRef<Path>>(filepath: P) -> Result<String> {
     Ok(buf)
 }
 
+pub fn sort_by_key<K, V>(m: &mut IndexMap<K, V>)
+    where
+        K: Ord + Hash,
+{
+    m.sort_by(|k1, _, k2, _| k1.cmp(k2));
+}
+
+pub fn sort_by_value<K, V>(m: &mut IndexMap<K, V>)
+    where
+        K: Ord + Hash,
+        V: Ord
+{
+    m.sort_by(|_, v1, _, v2| v1.cmp(v2));
+}
