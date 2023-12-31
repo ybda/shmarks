@@ -1,44 +1,16 @@
 use crate::error::{Error, Result};
 use std::{
-    collections::BTreeMap,
-    path::{Path, PathBuf},
+    path::{Path},
 };
-use toml::Table;
-
-pub type AliasDirs = BTreeMap<String, PathBuf>;
+use toml::{Table, Value};
 
 
-pub fn from_toml(table: &Table) -> Result<AliasDirs> {
-    let mut ad = AliasDirs::new();
-
-    for (key, value) in table {
-        if let toml::Value::String(string_value) = value {
-            ad.insert(key.to_string(), PathBuf::from(string_value.to_string()));
-        }
-    }
-
-    Ok(ad)
-}
-
-pub fn to_toml(ad: &AliasDirs) -> toml::Value {
-    let mut table = toml::value::Table::new();
-
-    for (key, value) in ad {
-        table.insert(
-            key.to_string(),
-            toml::Value::String(value.to_str().unwrap().to_string()),
-        );
-    }
-
-    toml::Value::Table(table)
-}
-
-pub fn remove_elements_by_value<P: AsRef<Path>>(ad: &mut AliasDirs, value: P) -> Result<()> {
+pub fn remove_elements_by_value<P: AsRef<Path>>(ad: &mut Table, value: P) -> Result<()> {
     let len_before = ad.len();
 
     {
         let value_str = value.as_ref().to_str().unwrap();
-        ad.retain(|_, v| v.to_str().unwrap() != value_str);
+        ad.retain(|_, v| v.is_str() && v.as_str().unwrap() != value_str);
     }
 
     if len_before == ad.len() {

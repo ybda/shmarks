@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use std::io::Write;
 use toml::Table;
 
-use crate::alias_dirs::{self, AliasDirs};
+use crate::alias_dirs::{self};
 use crate::constants::{ENV_VAR_SHMARKS_LIST_PATH, SHMARKS_DEFAULT_FILENAME};
 use crate::error::{Error, Result};
 use crate::util;
@@ -25,46 +25,24 @@ pub fn retrieve_filepath() -> Result<PathBuf> {
     )
 }
 
-pub fn parse<P: AsRef<Path>>(shmarks_filepath: P) -> Result<AliasDirs> {
-    let toml: toml::Value = {
-        let toml_str = util::read_file_contents(&shmarks_filepath)?;
+pub fn toml_from_file<P: AsRef<Path>>(shmarks_filepath: P) -> Result<Table> {
+    let toml_str = util::read_file_contents(&shmarks_filepath)?;
 
-        toml::from_str(&toml_str).map_err(|err| {
-            format!(
-                "Failed parsing toml from '{}': {}",
-                shmarks_filepath.as_ref().to_str().unwrap(),
-                err
-            )
-        })?
-    };
-
-    let table = toml_value_to_table(&toml)?;
-
-    Ok({
-        alias_dirs::from_toml(&table).map_err(|err| {
-            format!(
-                "Failed processing toml from '{}': {}",
-                shmarks_filepath.as_ref().to_str().unwrap(),
-                err
-            )
-        })?
-    })
+    Ok(toml::from_str(&toml_str).map_err(|err| {
+        format!(
+            "Failed parsing toml from '{}': {}",
+            shmarks_filepath.as_ref().to_str().unwrap(),
+            err
+        )
+    })?)
 }
 
-fn toml_value_to_table(toml: &toml::Value) -> Result<&Table> {
-    if let toml::Value::Table(table) = toml {
-        Ok(table)
-    } else {
-        Err(Error::Msg("Invalid TOML structure. Expected table.".to_string()))
-    }
-}
-
-pub fn update<P: AsRef<Path>>(shmarks_filepath: P, ad: &AliasDirs) -> Result<()> {
+pub fn update<P: AsRef<Path>>(shmarks_filepath: P, ad: &Table) -> Result<()> {
     // Truncate file
     let mut truncated_file = File::create(shmarks_filepath.as_ref())
         .map_err(|err| format!("Failed truncating '{}': {}", shmarks_filepath.as_ref().to_string_lossy(), err))?;
 
-    let updated_shmarks_toml_str = toml::to_string_pretty(&alias_dirs::to_toml(&ad))?;
+    let updated_shmarks_toml_str = toml::to_string_pretty(&ad)?;
 
     truncated_file.write_all(updated_shmarks_toml_str.as_bytes()).map_err(|err| {
         format!("Failed writing into '{}': {}", shmarks_filepath.as_ref().to_string_lossy(), err)

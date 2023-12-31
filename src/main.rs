@@ -10,11 +10,11 @@ mod normalize;
 mod process_subcommand;
 mod shmarks_file;
 mod util;
-use crate::alias_dirs::AliasDirs;
 use crate::cli::{Cli, Commands};
 use crate::error::Result;
 use std::path::Path;
 use std::process;
+use toml::Table;
 
 fn main() {
     run().unwrap_or_else(|e| {
@@ -31,14 +31,14 @@ fn run() -> Result<()> {
             .map_err(|err| format!("Failed creating '{}': {}", &shmarks_filepath.to_string_lossy(), err))?;
     }
 
-    let mut ad: AliasDirs = shmarks_file::parse(&shmarks_filepath)?;
+    let mut ad = shmarks_file::toml_from_file(&shmarks_filepath)?;
 
     process_args(&mut ad, &shmarks_filepath)?;
 
     Ok(())
 }
 
-fn process_args<P: AsRef<Path>>(ad: &mut AliasDirs, shmarks_filepath: P) -> Result<()> {
+fn process_args<P: AsRef<Path>>(ad: &mut Table, shmarks_filepath: P) -> Result<()> {
     let opts = Cli::parse();
 
     match opts.command {

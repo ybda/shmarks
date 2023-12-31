@@ -1,11 +1,12 @@
-use crate::alias_dirs::AliasDirs;
 use crate::cli::{Cli, LsOpts, NewOpts, RmOpts};
 use crate::constants::LS_COLOR;
 use crate::error::{Error, Result};
 use crate::{alias_dirs, normalize, util};
 use std::borrow::Cow;
+use toml::{Table, Value};
+use toml::Value::String;
 
-pub fn ls(opts: &LsOpts, ad: &mut AliasDirs) {
+pub fn ls(opts: &LsOpts, ad: &mut Table) {
     if ad.keys().len() == 0 {
         return;
     }
@@ -19,7 +20,7 @@ pub fn ls(opts: &LsOpts, ad: &mut AliasDirs) {
     }
 }
 
-pub fn rm(opts: &RmOpts, ad: &mut AliasDirs) -> Result<()> {
+pub fn rm(opts: &RmOpts, ad: &mut Table) -> Result<()> {
     if let Some(alias) = &opts.alias {
         if ad.contains_key(alias) {
             ad.remove(alias);
@@ -43,7 +44,7 @@ pub fn rm(opts: &RmOpts, ad: &mut AliasDirs) -> Result<()> {
     Ok(())
 }
 
-pub fn new(opts: &NewOpts, ad: &mut AliasDirs) -> Result<()> {
+pub fn new(opts: &NewOpts, ad: &mut Table) -> Result<()> {
     alias_dirs::validate_alias_name(&opts.alias)?;
 
     let dir = if let Some(dir) = &opts.directory {
@@ -54,16 +55,16 @@ pub fn new(opts: &NewOpts, ad: &mut AliasDirs) -> Result<()> {
 
     let absolute_path_arg = normalize::abs_normalize_path(dir.as_ref())?;
 
-    ad.insert(opts.alias.clone(), absolute_path_arg);
+    ad.insert(opts.alias.clone(), String(absolute_path_arg.to_str().unwrap().to_string()));
 
     Ok(())
 }
 
-pub fn none(cli: &Cli, ad: &AliasDirs) -> Result<()> {
+pub fn none(cli: &Cli, ad: &Table) -> Result<()> {
     if let Some(alias) = &cli.alias {
         let dir_to_set = ad.get(alias);
-        if let Some(dir) = dir_to_set {
-            println!("{}", dir.to_string_lossy());
+        if let Some(String(dir)) = dir_to_set {
+            println!("{}", dir);
 
             return Ok(());
         }
