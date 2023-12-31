@@ -3,6 +3,8 @@ shmarks
 
 [![Crates.io](https://img.shields.io/crates/v/shmarks.svg)](https://crates.io/crates/shmarks)
 
+![Example](https://i.imgur.com/lcbWcXr.png)
+
 # Usage
 ```
 $ shmarks
