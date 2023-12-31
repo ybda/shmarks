@@ -6,7 +6,7 @@ use clap::{Args, Parser, Subcommand, ValueHint};
 #[command(version, about, long_about = None, args_conflicts_with_subcommands = true, arg_required_else_help = true)]
 pub struct Cli {
     /// Alias of the directory to jump into.
-    #[arg(short, long)]
+    #[arg(short, long, exclusive = true)]
     pub alias: Option<String>,
 
     #[command(subcommand)]
@@ -18,6 +18,7 @@ pub enum Commands {
     New(NewOpts),
     Rm(RmOpts),
     Ls(LsOpts),
+    Sort(SortOpts),
 }
 
 /// Create new mark. Creates mark for current directory by default.
@@ -51,6 +52,15 @@ pub struct RmOpts {
 #[command(visible_alias = "l", alias = "list")]
 pub struct LsOpts {
     /// Print directories as well.
+    #[clap(short, long)]
+    pub directory: bool,
+}
+
+/// Sort shmarks file.
+#[derive(Args, Debug)]
+#[command(visible_alias = "s")]
+pub struct SortOpts {
+    /// Sort by directories.
     #[clap(short, long)]
     pub directory: bool,
 }

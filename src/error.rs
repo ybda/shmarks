@@ -11,7 +11,10 @@ pub enum Error {
     Fmt(#[from] ::std::fmt::Error),
 
     #[error(transparent)]
-    Toml(#[from] ::toml::ser::Error),
+    TomlSer(#[from] ::toml::ser::Error),
+
+    #[error(transparent)]
+    TomlDe(#[from] ::toml::de::Error),
 
     #[error("{0}")]
     Msg(String),

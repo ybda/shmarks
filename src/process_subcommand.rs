@@ -1,26 +1,27 @@
-use crate::cli::{Cli, LsOpts, NewOpts, RmOpts};
+use crate::cli::{Cli, LsOpts, NewOpts, RmOpts, SortOpts};
 use crate::constants::LS_COLOR;
 use crate::error::{Error, Result};
 use crate::{alias_dirs, normalize, util};
 use std::borrow::Cow;
-use toml::{Table, Value};
-use toml::Value::String;
+use crate::alias_dirs::{AliasDirs, sort_by_key, sort_by_value};
 
-pub fn ls(opts: &LsOpts, ad: &mut Table) {
-    if ad.keys().len() == 0 {
-        return;
-    }
+pub fn new(opts: &NewOpts, ad: &mut AliasDirs) -> Result<()> {
+    alias_dirs::validate_alias_name(&opts.alias)?;
 
-    if opts.directory {
-        // Colored print in two columns
-        util::print_keys_long_colored(ad, LS_COLOR.bold(), 3);
+    let dir = if let Some(dir) = &opts.directory {
+        Cow::Borrowed(dir)
     } else {
-        // Simple print like "a1 a2 a3\n"
-        util::print_keys_separated_by_space(ad);
-    }
+        Cow::Owned(util::retrieve_env_current_dir()?)
+    };
+
+    let absolute_path_arg = normalize::abs_normalize_path(dir.as_ref())?;
+
+    ad.insert(opts.alias.clone(), absolute_path_arg.to_str().unwrap().to_string());
+
+    Ok(())
 }
 
-pub fn rm(opts: &RmOpts, ad: &mut Table) -> Result<()> {
+pub fn rm(opts: &RmOpts, ad: &mut AliasDirs) -> Result<()> {
     if let Some(alias) = &opts.alias {
         if ad.contains_key(alias) {
             ad.remove(alias);
@@ -39,31 +40,41 @@ pub fn rm(opts: &RmOpts, ad: &mut Table) -> Result<()> {
         }
     };
 
-    alias_dirs::remove_elements_by_value(ad, &dir)?;
+    alias_dirs::remove_aliases_by_dir(ad, &dir.to_string_lossy())?;
 
     Ok(())
 }
 
-pub fn new(opts: &NewOpts, ad: &mut Table) -> Result<()> {
-    alias_dirs::validate_alias_name(&opts.alias)?;
+pub fn ls(opts: &LsOpts, ad: &mut AliasDirs) {
+    if ad.keys().len() == 0 {
+        return;
+    }
 
-    let dir = if let Some(dir) = &opts.directory {
-        Cow::Borrowed(dir)
+    if opts.directory {
+        // Colored print in two columns
+        alias_dirs::print_keys_long_colored(ad, LS_COLOR.bold(), 3);
     } else {
-        Cow::Owned(util::retrieve_env_current_dir()?)
-    };
-
-    let absolute_path_arg = normalize::abs_normalize_path(dir.as_ref())?;
-
-    ad.insert(opts.alias.clone(), String(absolute_path_arg.to_str().unwrap().to_string()));
-
-    Ok(())
+        // Simple print like "a1 a2 a3\n"
+        alias_dirs::print_keys_separated_by_space(ad);
+    }
 }
 
-pub fn none(cli: &Cli, ad: &Table) -> Result<()> {
+pub fn sort(opts: &SortOpts, ad: &mut AliasDirs) {
+    if ad.keys().len() == 0 {
+        return;
+    }
+
+    if opts.directory {
+        sort_by_value(ad);
+    } else {
+        sort_by_key(ad);
+    }
+}
+
+pub fn none(cli: &Cli, ad: &AliasDirs) -> Result<()> {
     if let Some(alias) = &cli.alias {
         let dir_to_set = ad.get(alias);
-        if let Some(String(dir)) = dir_to_set {
+        if let Some(dir) = dir_to_set {
             println!("{}", dir);
 
             return Ok(());

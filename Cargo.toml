@@ -1,6 +1,6 @@
 [package]
 name = "shmarks"
-version = "0.1.7"
+version = "0.1.8"
 edition = "2021"
 authors = ["Belkanov Dmitriy <dbkkll@yandex.ru>"]
 description = "Directory bookmarks for the shell."
@@ -10,7 +10,9 @@ description = "Directory bookmarks for the shell."
 [dependencies]
 clap = { version = "4.4.12", features = ["cargo", "derive"] }
 dirs = "5.0.1"
+indexmap = { version = "2.1.0", features = ["serde"] }
 nu-ansi-term = "0.49.0"
 regex = "1.10.2"
 thiserror = "1.0"
 toml = { version = "0.8.8", features = ["preserve_order"] }
+serde = { version = "1.0.193", features = ["derive"] }

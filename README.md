@@ -3,7 +3,7 @@ shmarks
 
 # Usage
 ```
-$ shmarks --help
+$ shmarks
 Directory bookmarks for the shell.
 
 Usage: shmarks [OPTIONS]
@@ -13,6 +13,7 @@ Commands:
   new   Create new mark. Creates mark for current directory by default [aliases: n]
   rm    Remove mark. Removes mark of current dir if no args provided [aliases: r]
   ls    List all marks [aliases: l]
+  sort  Sort shmarks file [aliases: s]
   help  Print this message or the help of the given subcommand(s)
 
 Options:
@@ -23,9 +24,10 @@ Options:
 
 ## Code to add in your .zshrc (should work with little changes in other shells as well)
 ```
+export SHMARKS_LIST_PATH="$HOME/.local/share/shmarks.toml"
+export SHMARKS_AUTO_SORT="d" # sort on adding new alias: a = by aliases, d = by directories, otherwise no sorting
 alias s='shmarks'
 alias p='shmarks ls -d' # Aesthetic print
-export SHMARKS_LIST_PATH="$HOME/.local/share/shmarks.toml"
 alias se="$EDITOR $SHMARKS_LIST_PATH" # Edit shmarks
 f() {
     if [[ $# -eq 0 ]]; then
