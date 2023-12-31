@@ -2,6 +2,7 @@ use std::env;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::io::Write;
+use toml::Table;
 
 use crate::alias_dirs::{self, AliasDirs};
 use crate::constants::{ENV_VAR_SHMARKS_LIST_PATH, SHMARKS_DEFAULT_FILENAME};
@@ -36,8 +37,11 @@ pub fn parse<P: AsRef<Path>>(shmarks_filepath: P) -> Result<AliasDirs> {
             )
         })?
     };
+
+    let table = toml_value_to_table(&toml)?;
+
     Ok({
-        alias_dirs::from_toml(&toml).map_err(|err| {
+        alias_dirs::from_toml(&table).map_err(|err| {
             format!(
                 "Failed processing toml from '{}': {}",
                 shmarks_filepath.as_ref().to_str().unwrap(),
@@ -45,6 +49,14 @@ pub fn parse<P: AsRef<Path>>(shmarks_filepath: P) -> Result<AliasDirs> {
             )
         })?
     })
+}
+
+fn toml_value_to_table(toml: &toml::Value) -> Result<&Table> {
+    if let toml::Value::Table(table) = toml {
+        Ok(table)
+    } else {
+        Err(Error::Msg("Invalid TOML structure. Expected table.".to_string()))
+    }
 }
 
 pub fn update<P: AsRef<Path>>(shmarks_filepath: P, ad: &AliasDirs) -> Result<()> {

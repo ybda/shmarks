@@ -3,23 +3,21 @@ use std::{
     collections::BTreeMap,
     path::{Path, PathBuf},
 };
+use toml::Table;
 
 pub type AliasDirs = BTreeMap<String, PathBuf>;
 
-pub fn from_toml(toml: &toml::Value) -> Result<AliasDirs> {
-    if let toml::Value::Table(table) = toml {
-        let mut ad = AliasDirs::new();
 
-        for (key, value) in table {
-            if let toml::Value::String(string_value) = value {
-                ad.insert(key.to_string(), PathBuf::from(string_value.to_string()));
-            }
+pub fn from_toml(table: &Table) -> Result<AliasDirs> {
+    let mut ad = AliasDirs::new();
+
+    for (key, value) in table {
+        if let toml::Value::String(string_value) = value {
+            ad.insert(key.to_string(), PathBuf::from(string_value.to_string()));
         }
-
-        Ok(ad)
-    } else {
-        Err(Error::Msg("Invalid TOML structure".to_string()))
     }
+
+    Ok(ad)
 }
 
 pub fn to_toml(ad: &AliasDirs) -> toml::Value {
