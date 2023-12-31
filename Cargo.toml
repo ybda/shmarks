@@ -1,11 +1,21 @@
 [package]
 name = "shmarks"
-version = "0.1.8"
+version = "0.1.9"
 edition = "2021"
 authors = ["Belkanov Dmitriy <dbkkll@yandex.ru>"]
 description = "Directory bookmarks for the shell."
+license-file = "LICENSE"
+categories = ["command-line-interface", "command-line-utilities"]
+homepage = "https://github.com/ybda/shmarks"
+repository = "https://github.com/ybda/shmarks"
+readme = "README.md"
+exclude = [
+    ".vscode"
+]
+rust-version = "1.77.0"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lints.rust]
+unsafe_code = "forbid"
 
 [dependencies]
 clap = { version = "4.4.12", features = ["cargo", "derive"] }

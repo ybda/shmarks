@@ -114,7 +114,7 @@ List all saved marks like "/bin/ls -l" in column with dirs showed
 ```
 
 ## Note
-- By default shmarks.toml located in $XDG_DATA_HOME or $HOME/.local/share. You could override it with $SHMARKS_LIST_PATH
+- By default, shmarks.toml located in $XDG_DATA_HOME or $HOME/.local/share. You could override it with $SHMARKS_LIST_PATH
 - It requires nightly Rust only because of the "std::path::absolute" 
 
 ## Inspired by
