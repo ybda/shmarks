@@ -3,11 +3,44 @@ shmarks
 
 [![Crates.io](https://img.shields.io/crates/v/shmarks.svg)](https://crates.io/crates/shmarks)
 
+## Getting started
 ![Example](https://i.imgur.com/lcbWcXr.png)
 
-# Usage
-```
-$ shmarks
+## Installation
+
+1. **Install binary**
+
+    ```bash
+    > cargo install shmarks --locked
+    ```
+
+2. **Add code in your .zshrc** (should work with little changes in other shells as well)
+
+    ```bash
+    export SHMARKS_LIST_PATH="$HOME/.local/share/shmarks.toml"
+    export SHMARKS_AUTO_SORT="d" # sort on adding new alias: a = by aliases, d = by directories, otherwise no sorting
+    export SHMARKS_DEFAULT_ALIAS="default" # default alias to jump into if no alias name was provided
+    alias s='shmarks'
+    alias p='shmarks ls -d' # aesthetic print
+    alias se="$EDITOR $SHMARKS_LIST_PATH" # edit shmarks
+    # Jump by alias
+    f() {
+        if [[ $# -eq 0 ]]; then
+            cd "$(shmarks -a "$SHMARKS_DEFAULT_ALIAS")"
+        else
+            cd "$(shmarks -a "$@")"
+        fi
+    }
+    # Autocompletion stuff
+    _shmarks_compzsh() {
+        reply=($(shmarks ls))
+    }
+    compctl -K _shmarks_compzsh f
+    ```
+
+## Usage
+```bash
+> shmarks
 Directory bookmarks for the shell.
 
 Usage: shmarks [OPTIONS]
@@ -26,30 +59,7 @@ Options:
   -V, --version        Print version
 ```
 
-## Code to add in your .zshrc (should work with little changes in other shells as well)
-```
-export SHMARKS_LIST_PATH="$HOME/.local/share/shmarks.toml"
-export SHMARKS_AUTO_SORT="d" # sort on adding new alias: a = by aliases, d = by directories, otherwise no sorting
-alias s='shmarks'
-alias p='shmarks ls -d' # Aesthetic print
-alias se="$EDITOR $SHMARKS_LIST_PATH" # Edit shmarks
-f() {
-    if [[ $# -eq 0 ]]; then
-        cd "$(shmarks -a DEFAULT)"
-    else
-        cd "$(shmarks -a "$@")"
-    fi
-}
-# Autocompletion stuff
-_shmarks_compzsh() {
-    reply=($(shmarks ls))
-}
-compctl -K _shmarks_compzsh f
-```
-
-## How to use
-
-Jump by alias DEFAULT into default dir
+Jump by alias 'default' into default dir
 
 ```bash
 > f
@@ -61,13 +71,13 @@ Jump by alias
 > f myalias
 ```
 
-Edit marks file in preferred $EDITOR
+Edit marks file in $EDITOR
 
 ```bash
 > se
 ```
 
-Save current dir (pwd) to shmarks
+Save current dir (pwd) to shmarks and sort shmarks file if $SHMARKS_AUTO_SORT was set
 
 ```bash
 > shmarks new myalias
@@ -107,7 +117,7 @@ List all saved marks like plain GNU "ls" utility
 > shmarks ls 
 ```
 
-List all saved marks like "/bin/ls -l" in column with dirs showed
+List all saved marks like "/bin/ls -l" in columns with dirs showed, colored 
 
 ```bash
 > shmarks ls -d
@@ -117,9 +127,15 @@ List all saved marks like "/bin/ls -l" in column with dirs showed
 > p
 ```
 
-## Note
-- By default, shmarks.toml located in $XDG_DATA_HOME or $HOME/.local/share. You could override it with $SHMARKS_LIST_PATH
-- It requires nightly Rust only because of the "std::path::absolute" 
+Sort shmarks by directories (alphabetical order)
 
-## Inspired by
+```bash
+> shmarks sort -d
+```
+
+### Note
+- By default, shmarks.toml located in $XDG_DATA_HOME or $HOME/.local/share. You could override it with $SHMARKS_LIST_PATH
+- It requires nightly Rust only because of the "std::path::absolute" to resolve relative paths that might not exist
+
+### Inspired by
 - [huyng/bashmarks](https://github.com/huyng/bashmarks)
