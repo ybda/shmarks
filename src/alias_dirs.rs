@@ -1,10 +1,12 @@
-use crate::error::{Error, Result};
-use std::path::Path;
 use std::fs::File;
-use indexmap::IndexMap;
-use crate::util;
 use std::io::Write;
+use std::path::Path;
+
+use indexmap::IndexMap;
 use nu_ansi_term::Style;
+
+use crate::error::{Error, Result};
+use crate::util;
 
 pub type AliasDirs = IndexMap<String, String>;
 
@@ -22,8 +24,9 @@ pub fn ad_from_file<P: AsRef<Path>>(shmarks_filepath: P) -> Result<AliasDirs> {
 
 pub fn update_shmarks_file<P: AsRef<Path>>(shmarks_filepath: P, ad: &AliasDirs) -> Result<()> {
     // Truncate file
-    let mut truncated_file = File::create(shmarks_filepath.as_ref())
-        .map_err(|err| format!("Failed truncating '{}': {}", shmarks_filepath.as_ref().to_string_lossy(), err))?;
+    let mut truncated_file = File::create(shmarks_filepath.as_ref()).map_err(|err| {
+        format!("Failed truncating '{}': {}", shmarks_filepath.as_ref().to_string_lossy(), err)
+    })?;
 
     let updated_shmarks_toml_str = toml::to_string_pretty(&ad)?;
 
@@ -66,12 +69,7 @@ pub fn print_keys_long_colored(map: &AliasDirs, key_style: Style, min_number_of_
     };
 
     for (key, val) in map {
-        println!(
-            "{:<width$}{}",
-            key_style.paint(key).to_string(),
-            val,
-            width = padding
-        );
+        println!("{:<width$}{}", key_style.paint(key).to_string(), val, width = padding);
     }
 }
 
@@ -79,11 +77,8 @@ pub fn validate_alias_name(alias_name: &str) -> Result<()> {
     let pattern = regex::Regex::new(r"^[a-zA-Z0-9_-]+$").unwrap();
 
     if !pattern.is_match(alias_name) {
-        return Err(Error::Msg(format!(
-            "Alias name is invalid: '{}'", alias_name
-        )));
+        return Err(Error::Msg(format!("Alias name is invalid: '{}'", alias_name)));
     }
 
     Ok(())
 }
-

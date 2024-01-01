@@ -1,6 +1,7 @@
 #![feature(absolute_path)]
 
 use std::fs::File;
+
 use clap::Parser;
 mod alias_dirs;
 mod cli;
@@ -9,12 +10,15 @@ mod error;
 mod normalize;
 mod process_subcommand;
 mod util;
-use crate::cli::{Cli, Commands};
-use crate::error::{Error, Result};
 use std::path::{Path, PathBuf};
 use std::{env, process};
+
 use crate::alias_dirs::AliasDirs;
-use crate::constants::{ENV_VAR_SHMARKS_AUTO_SORT, ENV_VAR_SHMARKS_LIST_PATH, SHMARKS_DEFAULT_FILENAME};
+use crate::cli::{Cli, Commands};
+use crate::constants::{
+    ENV_VAR_SHMARKS_AUTO_SORT, ENV_VAR_SHMARKS_LIST_PATH, SHMARKS_DEFAULT_FILENAME,
+};
+use crate::error::{Error, Result};
 
 fn main() {
     run().unwrap_or_else(|e| {
@@ -27,8 +31,9 @@ fn run() -> Result<()> {
     let shmarks_filepath = retrieve_shmarks_filepath()?;
 
     if !shmarks_filepath.exists() {
-        File::create(&shmarks_filepath)
-            .map_err(|err| format!("Failed creating '{}': {}", &shmarks_filepath.to_string_lossy(), err))?;
+        File::create(&shmarks_filepath).map_err(|err| {
+            format!("Failed creating '{}': {}", &shmarks_filepath.to_string_lossy(), err)
+        })?;
     }
 
     let mut ad = alias_dirs::ad_from_file(&shmarks_filepath)?;
@@ -39,19 +44,17 @@ fn run() -> Result<()> {
 }
 
 fn retrieve_shmarks_filepath() -> Result<PathBuf> {
-    Ok(
-        if let Some(fp) = env::var_os(ENV_VAR_SHMARKS_LIST_PATH).map(PathBuf::from) {
-            fp
-        } else {
-            let default_dir = dirs::data_local_dir().ok_or_else(|| {
-                Error::from(format!(
-                    "Failed resolving default directory for shmarks. Set '{}' environment variable",
-                    ENV_VAR_SHMARKS_LIST_PATH
-                ))
-            })?;
-            default_dir.join(SHMARKS_DEFAULT_FILENAME)
-        },
-    )
+    Ok(if let Some(fp) = env::var_os(ENV_VAR_SHMARKS_LIST_PATH).map(PathBuf::from) {
+        fp
+    } else {
+        let default_dir = dirs::data_local_dir().ok_or_else(|| {
+            Error::from(format!(
+                "Failed resolving default directory for shmarks. Set '{}' environment variable",
+                ENV_VAR_SHMARKS_LIST_PATH
+            ))
+        })?;
+        default_dir.join(SHMARKS_DEFAULT_FILENAME)
+    })
 }
 
 fn process_args<P: AsRef<Path>>(ad: &mut AliasDirs, shmarks_filepath: P) -> Result<()> {

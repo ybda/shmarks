@@ -1,5 +1,6 @@
-use crate::error::Result;
 use std::path::{Path, PathBuf};
+
+use crate::error::Result;
 
 pub fn abs_normalize_path<P: AsRef<Path>>(path: P) -> Result<PathBuf> {
     Ok(normalize_path(std::path::absolute(path)?))
@@ -26,11 +27,7 @@ mod tests {
     use super::*;
 
     fn convert_to_windows_path(path: &str) -> String {
-        if cfg!(windows) {
-            path.replace("/", "\\")
-        } else {
-            path.to_string()
-        }
+        if cfg!(windows) { path.replace("/", "\\") } else { path.to_string() }
     }
 
     #[test]
@@ -71,18 +68,13 @@ mod tests {
         ];
 
         for &(left, right) in &paths_eq {
-            assert_eq!(
-                abs_normalize_path(&PathBuf::from(left)).unwrap().to_string_lossy(),
-                right
-            );
+            assert_eq!(abs_normalize_path(&PathBuf::from(left)).unwrap().to_string_lossy(), right);
         }
 
         for &(left, right) in &paths_ends_with {
             let actual_val = abs_normalize_path(PathBuf::from(left)).unwrap();
 
-            assert!(
-                actual_val.to_string_lossy().ends_with(right)
-            );
+            assert!(actual_val.to_string_lossy().ends_with(right));
         }
     }
 }

@@ -1,9 +1,10 @@
+use std::borrow::Cow;
+
+use crate::alias_dirs::AliasDirs;
 use crate::cli::{Cli, LsOpts, NewOpts, RmOpts, SortOpts};
 use crate::constants::LS_COLOR;
 use crate::error::{Error, Result};
 use crate::{alias_dirs, normalize, util};
-use std::borrow::Cow;
-use crate::alias_dirs::{AliasDirs};
 
 pub fn new(opts: &NewOpts, ad: &mut AliasDirs) -> Result<()> {
     alias_dirs::validate_alias_name(&opts.alias)?;
