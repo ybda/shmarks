@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use clap::{Args, Parser, Subcommand, ValueHint};
+use clap::{Args, Parser, ValueHint};
 
 #[derive(Parser)]
 #[command(version, about, long_about = None, args_conflicts_with_subcommands = true, arg_required_else_help = true)]
@@ -10,11 +10,11 @@ pub struct Cli {
     pub alias: Option<String>,
 
     #[command(subcommand)]
-    pub command: Option<Commands>,
+    pub subcommand: Option<Subcommand>,
 }
 
-#[derive(Subcommand)]
-pub enum Commands {
+#[derive(clap::Subcommand)]
+pub enum Subcommand {
     New(NewOpts),
     Rm(RmOpts),
     Ls(LsOpts),

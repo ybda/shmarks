@@ -1,17 +1,15 @@
-use std::path::PathBuf;
-
 use crate::alias_dirs::AliasDirs;
-use crate::cli::{Commands, LsOpts, NewOpts, RmOpts, SortOpts};
-use crate::constants::LS_COLOR;
+use crate::cli::{LsOpts, NewOpts, RmOpts, SortOpts, Subcommand};
 use crate::error::{Error, Result};
-use crate::{alias_dirs, normalize, util};
+use crate::{alias_dirs, constants, util};
+use crate::constants::LS_ALIAS_STYLE_NUMBER_OF_SPACES;
 
-pub fn process(subcommand: &Commands, ad: &mut AliasDirs) -> Result<()> {
+pub fn process(subcommand: &Subcommand, ad: &mut AliasDirs) -> Result<()> {
     match subcommand {
-        Commands::New(opts) => new(&opts, ad)?,
-        Commands::Rm(opts) => remove(&opts, ad)?,
-        Commands::Ls(opts) => list(&opts, ad),
-        Commands::Sort(opts) => sort(&opts, ad),
+        Subcommand::New(opts) => new(&opts, ad)?,
+        Subcommand::Rm(opts) => remove(&opts, ad)?,
+        Subcommand::Ls(opts) => list(&opts, ad),
+        Subcommand::Sort(opts) => sort(&opts, ad),
     }
     Ok(())
 }
@@ -28,11 +26,7 @@ fn new(opts: &NewOpts, ad: &mut AliasDirs) -> Result<()> {
         return Err(Error::AliasAlreadyExists(opts.alias.to_string()));
     }
 
-    let directory: PathBuf = if let Some(dir) = &opts.directory {
-        normalize::abs_normalize_path(dir)?
-    } else {
-        util::retrieve_env_current_dir()?
-    };
+    let directory = alias_dirs::directory_from_arguments_or_pwd(&opts.directory)?;
 
     ad.insert(opts.alias.clone(), directory.to_string_lossy().to_string());
 
@@ -49,14 +43,7 @@ fn remove(opts: &RmOpts, ad: &mut AliasDirs) -> Result<()> {
         return Ok(());
     }
 
-    let directory = {
-        if let Some(dir) = &opts.directory {
-            normalize::abs_normalize_path(&dir)?
-        } else {
-            // By default current dir is used
-            util::retrieve_env_current_dir()?
-        }
-    };
+    let directory = alias_dirs::directory_from_arguments_or_pwd(&opts.directory)?;
 
     alias_dirs::remove_aliases_by_directory(ad, &directory.to_string_lossy())?;
 
@@ -70,7 +57,7 @@ fn list(opts: &LsOpts, ad: &AliasDirs) {
 
     if opts.directory {
         // Colored print in two columns
-        alias_dirs::print_keys_long_colored(ad, LS_COLOR.bold(), 3);
+        alias_dirs::print_keys_long_colored(ad, constants::ls_alias_style(), LS_ALIAS_STYLE_NUMBER_OF_SPACES);
     } else {
         // Simple print like "a1 a2 a3\n"
         util::print_separated_by_space(ad.keys());

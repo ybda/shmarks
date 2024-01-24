@@ -2,16 +2,11 @@ use std::fmt::Display;
 use std::fs::File;
 use std::hash::Hash;
 use std::io::Read;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use indexmap::IndexMap;
 
 use crate::error::Result;
-
-pub fn retrieve_env_current_dir() -> Result<PathBuf> {
-    Ok(std::env::current_dir()
-        .map_err(|err| format!("Failed retrieving current directory: {}", err))?)
-}
 
 pub fn read_file_contents<P: AsRef<Path>>(filepath: P) -> Result<String> {
     let mut buf = String::new();

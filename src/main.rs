@@ -12,7 +12,7 @@ use std::path::{Path, PathBuf};
 use std::{env, process};
 
 use crate::alias_dirs::AliasDirs;
-use crate::cli::{Cli, Commands};
+use crate::cli::{Cli, Subcommand};
 use crate::constants::{
     ENV_VAR_SHMARKS_AUTO_SORT, ENV_VAR_SHMARKS_LIST_PATH, SHMARKS_DEFAULT_FILENAME,
 };
@@ -53,23 +53,23 @@ fn retrieve_shmarks_filepath() -> Result<PathBuf> {
     })
 }
 
-fn process_args<P: AsRef<Path>>(opts: &Cli, ad: &mut AliasDirs, shmarks_filepath: P) -> Result<()> {
-    let subcommand = match &opts.command {
+fn process_args<P: AsRef<Path>>(cli: &Cli, ad: &mut AliasDirs, shmarks_filepath: P) -> Result<()> {
+    let subcommand = match &cli.subcommand {
         Some(s) => {
             process_subcommand::process(s, ad)?;
             s
         }
         None => {
-            alias_dirs::process_directory_jump(&opts, ad)?;
+            alias_dirs::process_directory_jump(&cli, ad)?;
             return Ok(());
         }
     };
 
-    if matches!(subcommand, Commands::New(_) | Commands::Rm(_)) {
+    if matches!(subcommand, Subcommand::New(_) | Subcommand::Rm(_)) {
         try_auto_sort(ad);
     }
 
-    if matches!(subcommand, Commands::New(_) | Commands::Rm(_) | Commands::Sort(_)) {
+    if matches!(subcommand, Subcommand::New(_) | Subcommand::Rm(_) | Subcommand::Sort(_)) {
         alias_dirs::update_shmarks_file(shmarks_filepath.as_ref(), ad).map_err(|err| {
             format!(
                 "Failed updating shmarks file '{}': {}",

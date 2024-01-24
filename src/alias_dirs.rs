@@ -1,13 +1,13 @@
 use std::fs::File;
 use std::io::Write;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use indexmap::IndexMap;
 use nu_ansi_term::Style;
 
 use crate::cli::Cli;
 use crate::error::{Error, Result};
-use crate::util;
+use crate::{normalize, util};
 
 pub type AliasDirs = IndexMap<String, String>;
 
@@ -88,4 +88,14 @@ pub fn print_keys_long_colored(ad: &AliasDirs, key_style: Style, min_number_of_s
 pub fn alias_name_is_valid(alias_name: &str) -> bool {
     let pattern = regex::Regex::new(r"^[a-zA-Z0-9_-]+$").unwrap();
     pattern.is_match(alias_name)
+}
+
+pub fn directory_from_arguments_or_pwd(directory: &Option<PathBuf>) -> Result<PathBuf> {
+    let dir = if let Some(dir) = directory {
+        normalize::abs_normalize_path(&dir)?
+    } else {
+        std::env::current_dir()
+            .map_err(|err| format!("Failed retrieving current directory: {}", err))?
+    };
+    Ok(dir)
 }
