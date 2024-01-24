@@ -5,80 +5,87 @@ use std::path::Path;
 use indexmap::IndexMap;
 use nu_ansi_term::Style;
 
+use crate::cli::Cli;
 use crate::error::{Error, Result};
 use crate::util;
 
 pub type AliasDirs = IndexMap<String, String>;
 
 pub fn ad_from_file<P: AsRef<Path>>(shmarks_filepath: P) -> Result<AliasDirs> {
-    let toml_str = util::read_file_contents(&shmarks_filepath)?;
+    if !shmarks_filepath.as_ref().exists() {
+        File::create(shmarks_filepath.as_ref())
+            .map_err(|err| format!("Failed creating: {}", err))?;
+    }
 
-    Ok(toml::from_str(&toml_str).map_err(|err| {
-        format!(
-            "Failed parsing toml from '{}': {}",
-            shmarks_filepath.as_ref().to_str().unwrap(),
-            err
-        )
-    })?)
+    let toml_str = util::read_file_contents(shmarks_filepath.as_ref())
+        .map_err(|err| format!("Failed retrieving file contents: {}", err))?;
+
+    Ok(toml::from_str(&toml_str).map_err(|err| format!("Failed parsing toml: {}", err))?)
 }
 
 pub fn update_shmarks_file<P: AsRef<Path>>(shmarks_filepath: P, ad: &AliasDirs) -> Result<()> {
     // Truncate file
-    let mut truncated_file = File::create(shmarks_filepath.as_ref()).map_err(|err| {
-        format!("Failed truncating '{}': {}", shmarks_filepath.as_ref().to_string_lossy(), err)
-    })?;
+    let mut truncated_file = File::create(shmarks_filepath.as_ref())
+        .map_err(|err| format!("Failed truncating: {}", err))?;
 
     let updated_shmarks_toml_str = toml::to_string_pretty(&ad)?;
 
-    truncated_file.write_all(updated_shmarks_toml_str.as_bytes()).map_err(|err| {
-        format!("Failed writing into '{}': {}", shmarks_filepath.as_ref().to_string_lossy(), err)
-    })?;
+    truncated_file
+        .write_all(updated_shmarks_toml_str.as_bytes())
+        .map_err(|err| format!("Failed writing: {}", err))?;
 
     Ok(())
 }
 
-pub fn remove_aliases_by_dir(ad: &mut AliasDirs, val: &str) -> Result<()> {
+pub fn process_directory_jump(cli: &Cli, ad: &AliasDirs) -> Result<()> {
+    let alias = match &cli.alias {
+        Some(a) => a,
+        None => {
+            panic!(
+                "No arguments provided. Shouldn't happen because arg_required_else_help(true) is set"
+            )
+        }
+    };
+
+    let directory_of_alias = match ad.get(alias) {
+        Some(d) => d,
+        None => {
+            return Err(Error::AliasNotFound(alias.to_string()));
+        }
+    };
+
+    println!("{}", directory_of_alias);
+
+    return Ok(());
+}
+
+pub fn remove_aliases_by_directory(ad: &mut AliasDirs, directory: &str) -> Result<()> {
     let len_before = ad.len();
 
-    ad.retain(|_, v| v != val);
+    ad.retain(|_, v| v != directory);
 
     if len_before == ad.len() {
-        return Err(Error::AliasOfDirectoryXNotFound(val.to_string()));
+        return Err(Error::AliasOfDirectoryXNotFound(directory.to_string()));
     }
+
     Ok(())
 }
 
-pub fn print_keys_separated_by_space(map: &AliasDirs) {
-    let mut first = true;
-    for key in map.keys() {
-        if first {
-            print!("{}", key);
-            first = false;
-        } else {
-            print!(" {}", key);
-        }
-    }
-    println!();
-}
-
-pub fn print_keys_long_colored(map: &AliasDirs, key_style: Style, min_number_of_spaces: usize) {
+pub fn print_keys_long_colored(ad: &AliasDirs, key_style: Style, min_number_of_spaces: usize) {
     let padding = {
-        let max_key_length = map.keys().map(|s| s.len()).max().unwrap_or(0);
+        let max_key_length = ad.keys().map(|s| s.len()).max().unwrap_or(0);
         let key_style_len = key_style.paint(".").to_string().len() - 1; // minus one because we don't count the dot
         max_key_length + key_style_len + min_number_of_spaces
     };
 
-    for (key, val) in map {
+    for (key, val) in ad {
         println!("{:<width$}{}", key_style.paint(key).to_string(), val, width = padding);
     }
 }
 
-pub fn validate_alias_name(alias_name: &str) -> Result<()> {
+/// Accept only alphanumeric characters (letters and digits), underscores, and
+/// hyphens. Length must be > zero.
+pub fn alias_name_is_valid(alias_name: &str) -> bool {
     let pattern = regex::Regex::new(r"^[a-zA-Z0-9_-]+$").unwrap();
-
-    if !pattern.is_match(alias_name) {
-        return Err(Error::Msg(format!("Alias name is invalid: '{}'", alias_name)));
-    }
-
-    Ok(())
+    pattern.is_match(alias_name)
 }

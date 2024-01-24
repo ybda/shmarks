@@ -1,7 +1,5 @@
 #![feature(absolute_path)]
 
-use std::fs::File;
-
 use clap::Parser;
 mod alias_dirs;
 mod cli;
@@ -30,15 +28,13 @@ fn main() {
 fn run() -> Result<()> {
     let shmarks_filepath = retrieve_shmarks_filepath()?;
 
-    if !shmarks_filepath.exists() {
-        File::create(&shmarks_filepath).map_err(|err| {
-            format!("Failed creating '{}': {}", &shmarks_filepath.to_string_lossy(), err)
-        })?;
-    }
+    let mut ad = alias_dirs::ad_from_file(&shmarks_filepath).map_err(|err| {
+        format!("Failed processing toml file '{}': {}", &shmarks_filepath.to_string_lossy(), err)
+    })?;
 
-    let mut ad = alias_dirs::ad_from_file(&shmarks_filepath)?;
+    let opts = Cli::parse();
 
-    process_args(&mut ad, &shmarks_filepath)?;
+    process_args(&opts, &mut ad, &shmarks_filepath)?;
 
     Ok(())
 }
@@ -57,25 +53,30 @@ fn retrieve_shmarks_filepath() -> Result<PathBuf> {
     })
 }
 
-fn process_args<P: AsRef<Path>>(ad: &mut AliasDirs, shmarks_filepath: P) -> Result<()> {
-    let opts = Cli::parse();
+fn process_args<P: AsRef<Path>>(opts: &Cli, ad: &mut AliasDirs, shmarks_filepath: P) -> Result<()> {
+    let subcommand = match &opts.command {
+        Some(s) => {
+            process_subcommand::process(s, ad)?;
+            s
+        }
+        None => {
+            alias_dirs::process_directory_jump(&opts, ad)?;
+            return Ok(());
+        }
+    };
 
-    match opts.command {
-        Some(Commands::New(opts)) => {
-            process_subcommand::new(&opts, ad)?;
-            try_auto_sort(ad);
-            alias_dirs::update_shmarks_file(shmarks_filepath.as_ref(), ad)?;
-        }
-        Some(Commands::Rm(opts)) => {
-            process_subcommand::rm(&opts, ad)?;
-            alias_dirs::update_shmarks_file(shmarks_filepath.as_ref(), ad)?;
-        }
-        Some(Commands::Ls(opts)) => process_subcommand::ls(&opts, ad),
-        Some(Commands::Sort(opts)) => {
-            process_subcommand::sort(&opts, ad);
-            alias_dirs::update_shmarks_file(shmarks_filepath.as_ref(), ad)?;
-        }
-        _ => process_subcommand::none(&opts, ad)?,
+    if matches!(subcommand, Commands::New(_) | Commands::Rm(_)) {
+        try_auto_sort(ad);
+    }
+
+    if matches!(subcommand, Commands::New(_) | Commands::Rm(_) | Commands::Sort(_)) {
+        alias_dirs::update_shmarks_file(shmarks_filepath.as_ref(), ad).map_err(|err| {
+            format!(
+                "Failed updating shmarks file '{}': {}",
+                shmarks_filepath.as_ref().to_string_lossy(),
+                err
+            )
+        })?;
     }
 
     Ok(())
