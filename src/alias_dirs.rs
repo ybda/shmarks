@@ -79,7 +79,8 @@ pub fn print_keys_long_colored(ad: &AliasDirs, key_style: &Style, min_number_of_
     };
 
     for (key, val) in ad {
-        println!("{:<width$}{}", key_style.paint(key).to_string(), val, width = padding);
+        // don't use `println!` to avoid overhead of flushing each time
+        print!("{:<width$}{}\n", key_style.paint(key).to_string(), val, width = padding);
     }
 }
 
