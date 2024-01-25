@@ -68,7 +68,10 @@ mod tests {
         ];
 
         for &(left, right) in &paths_eq {
-            assert_eq!(normalize_and_absolutize(&PathBuf::from(left)).unwrap().to_string_lossy(), right);
+            assert_eq!(
+                normalize_and_absolutize(&PathBuf::from(left)).unwrap().to_string_lossy(),
+                right
+            );
         }
 
         for &(left, right) in &paths_ends_with {
