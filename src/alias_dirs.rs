@@ -14,7 +14,7 @@ pub type AliasDirs = IndexMap<String, String>;
 pub fn ad_from_file<P: AsRef<Path>>(shmarks_filepath: P) -> Result<AliasDirs> {
     if !shmarks_filepath.as_ref().exists() {
         File::create(shmarks_filepath.as_ref())
-            .map_err(|err| format!("Failed creating: {}", err))?;
+            .map_err(|err| format!("Failed creating file: {}", err))?;
     }
 
     let toml_str = util::read_file_contents(shmarks_filepath.as_ref())
@@ -71,7 +71,7 @@ pub fn remove_aliases_by_directory(ad: &mut AliasDirs, directory: &str) -> Resul
     Ok(())
 }
 
-pub fn print_keys_long_colored(ad: &AliasDirs, key_style: Style, min_number_of_spaces: usize) {
+pub fn print_keys_long_colored(ad: &AliasDirs, key_style: &Style, min_number_of_spaces: usize) {
     let padding = {
         let max_key_length = ad.keys().map(|s| s.len()).max().unwrap_or(0);
         let key_style_len = key_style.paint(".").to_string().len() - 1; // minus one because we don't count the dot
@@ -92,7 +92,7 @@ pub fn alias_name_is_valid(alias_name: &str) -> bool {
 
 pub fn directory_from_arguments_or_pwd(directory: &Option<PathBuf>) -> Result<PathBuf> {
     let dir = if let Some(dir) = directory {
-        normalize::abs_normalize_path(&dir)?
+        normalize::normalize_and_absolutize(&dir)?
     } else {
         std::env::current_dir()
             .map_err(|err| format!("Failed retrieving current directory: {}", err))?

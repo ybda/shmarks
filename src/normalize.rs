@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use crate::error::Result;
 
-pub fn abs_normalize_path<P: AsRef<Path>>(path: P) -> Result<PathBuf> {
+pub fn normalize_and_absolutize<P: AsRef<Path>>(path: P) -> Result<PathBuf> {
     Ok(normalize_path(std::path::absolute(path)?))
 }
 
@@ -68,11 +68,11 @@ mod tests {
         ];
 
         for &(left, right) in &paths_eq {
-            assert_eq!(abs_normalize_path(&PathBuf::from(left)).unwrap().to_string_lossy(), right);
+            assert_eq!(normalize_and_absolutize(&PathBuf::from(left)).unwrap().to_string_lossy(), right);
         }
 
         for &(left, right) in &paths_ends_with {
-            let actual_val = abs_normalize_path(PathBuf::from(left)).unwrap();
+            let actual_val = normalize_and_absolutize(PathBuf::from(left)).unwrap();
 
             assert!(actual_val.to_string_lossy().ends_with(right));
         }

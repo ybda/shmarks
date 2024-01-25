@@ -57,7 +57,7 @@ fn list(opts: &LsOpts, ad: &AliasDirs) {
 
     if opts.directory {
         // Colored print in two columns
-        alias_dirs::print_keys_long_colored(ad, constants::ls_alias_style(), LS_ALIAS_STYLE_NUMBER_OF_SPACES);
+        alias_dirs::print_keys_long_colored(ad, &constants::ls_alias_style(), LS_ALIAS_STYLE_NUMBER_OF_SPACES);
     } else {
         // Simple print like "a1 a2 a3\n"
         util::print_separated_by_space(ad.keys());
