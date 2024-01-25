@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.1.10] - 2023-01-25
+
+### Added
+
+- rustfmt.toml
+
+### Changed
+
+- Upgrade dependencies
+- README.md
+- Code refactor 
+
+### Fixed
+
+- Error handling
+
 ## [0.1.9] - 2023-12-31
 
 ### Added
@@ -17,4 +33,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - This file (CHANGELOG.md).
 - Restriction of alias replacement by default (--force flag for new subcommand)
 
+[0.1.10]: https://github.com/ybda/shmarks/commits/v0.1.10
 [0.1.9]: https://github.com/ybda/shmarks/commits/v0.1.9
