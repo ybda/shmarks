@@ -1,10 +1,16 @@
-shmarks
-------
+<h1 align="center">shmarks - a fast, easy, robust and convenient way of handling bookmarks of directories</h1>
+<div align="center">
 
-[![Crates.io](https://img.shields.io/crates/v/shmarks.svg)](https://crates.io/crates/shmarks)
+[![crates.io][crates.io-badge]][crates.io]
 
-## Getting started
-![Example](https://i.imgur.com/lcbWcXr.png)
+Create, remove, view sorted (by bookmark names of directory paths) bookmarks of your favorite directories
+</div>
+
+<div align="center">
+
+![Example-Screenshot][example-screenshot]
+
+</div>
 
 ## Installation
 
@@ -16,26 +22,34 @@ shmarks
 
 2. **Add code in your .zshrc** (should work with little changes in other shells as well)
 
+    Adding this into your directory of plugins might be a more clean option (include in .zshrc with `source plugins_dir/shmarks.zsh`)
+
     ```bash
-    export SHMARKS_LIST_PATH="$HOME/.local/share/shmarks.toml"
+    export SHMARKS_LIST_PATH="$HOME/.local/share/shmarks.toml" # place where your shell bookmarks (shmarks) stored
     export SHMARKS_AUTO_SORT="d" # sort on adding new alias: a = by aliases, d = by directories, otherwise no sorting
-    export SHMARKS_DEFAULT_ALIAS="default" # default alias to jump into if no alias name was provided
-    alias s='shmarks'
-    alias p='shmarks ls -d' # aesthetic print
-    alias se="$EDITOR $SHMARKS_LIST_PATH" # edit shmarks
+    export SHMARKS_DEFAULT_ALIAS="dd" # default alias to jump into if no alias name was provided
+    
     # Jump by alias
     f() {
         if [[ $# -eq 0 ]]; then
+            # jump to default dir if no arguments provided
             cd "$(shmarks -a "$SHMARKS_DEFAULT_ALIAS")"
         else
             cd "$(shmarks -a "$@")"
         fi
     }
-    # Autocompletion stuff
+    
+    # Might be interesting to you
+    alias s='shmarks' # shortcut for 'shmarks' binary
+    alias p='shmarks ls -d' # colored list print with directories
+    alias se="$EDITOR "$SHMARKS_LIST_PATH"" # edit shmarks
+    alias pf='shmarks ls -d | rg'  # find in print of directories
+    
+    # Autocompletion of alias
     _shmarks_compzsh() {
         reply=($(shmarks ls))
     }
-    compctl -K _shmarks_compzsh f
+    compctl -K _shmarks_compzsh f # change 'f' to alias set for jumping (6th line)
     ```
 
 ## Usage
@@ -138,4 +152,9 @@ Sort shmarks by directories (alphabetical order)
 - It requires nightly Rust only because of the "std::path::absolute" to resolve relative paths that might not exist
 
 ### Inspired by
-- [huyng/bashmarks](https://github.com/huyng/bashmarks)
+- ![huyng/bashmarks][huyng/bashmarks]
+
+[crates.io-badge]: https://img.shields.io/crates/v/shmarks?logo=rust&logoColor=white&style=flat-square
+[crates.io]: https://crates.io/crates/shmarks
+[huyng/bashmarks]: https://github.com/huyng/bashmarks
+[example-screenshot]: https://i.imgur.com/m0eYZA8.png
