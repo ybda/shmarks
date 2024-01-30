@@ -56,7 +56,7 @@ pub fn process_directory_jump(cli: &Cli, ad: &AliasDirs) -> Result<()> {
 
     println!("{}", directory_of_alias);
 
-    return Ok(());
+    Ok(())
 }
 
 pub fn remove_aliases_by_directory(ad: &mut AliasDirs, directory: &str) -> Result<()> {
@@ -80,7 +80,7 @@ pub fn print_keys_long_colored(ad: &AliasDirs, key_style: &Style, min_number_of_
 
     for (key, val) in ad {
         // don't use `println!` to avoid overhead of flushing each time
-        print!("{:<width$}{}\n", key_style.paint(key).to_string(), val, width = padding);
+        println!("{:<width$}{}", key_style.paint(key).to_string(), val, width = padding);
     }
 }
 
@@ -93,7 +93,7 @@ pub fn alias_name_is_valid(alias_name: &str) -> bool {
 
 pub fn directory_from_arguments_or_pwd(directory: &Option<PathBuf>) -> Result<PathBuf> {
     let dir = if let Some(dir) = directory {
-        normalize::normalize_and_absolutize(&dir)?
+        normalize::normalize_and_absolutize(dir)?
     } else {
         std::env::current_dir()
             .map_err(|err| format!("Failed retrieving current directory: {}", err))?

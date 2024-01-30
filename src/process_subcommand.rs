@@ -6,10 +6,10 @@ use crate::{alias_dirs, constants, util};
 
 pub fn process(subcommand: &Subcommand, ad: &mut AliasDirs) -> Result<()> {
     match subcommand {
-        Subcommand::New(opts) => new(&opts, ad)?,
-        Subcommand::Rm(opts) => remove(&opts, ad)?,
-        Subcommand::Ls(opts) => list(&opts, ad),
-        Subcommand::Sort(opts) => sort(&opts, ad),
+        Subcommand::New(opts) => new(opts, ad)?,
+        Subcommand::Rm(opts) => remove(opts, ad)?,
+        Subcommand::Ls(opts) => list(opts, ad),
+        Subcommand::Sort(opts) => sort(opts, ad),
     }
     Ok(())
 }
