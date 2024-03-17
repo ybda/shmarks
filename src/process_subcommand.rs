@@ -40,7 +40,7 @@ fn new(opts: &NewOpts, ad: &mut AliasDirs) -> Result<()> {
 fn remove(opts: &RmOpts, ad: &mut AliasDirs) -> Result<()> {
     // By aliases
 
-    if let Some(aliases) = &opts.alias {
+    if let Some(aliases) = &opts.aliases {
         for alias in aliases {
             if !ad.contains_key(alias) {
                 shmarks_warning!("Alias '{}' not found", alias);
@@ -54,7 +54,7 @@ fn remove(opts: &RmOpts, ad: &mut AliasDirs) -> Result<()> {
 
     // By directories
 
-    if let Some(dirs) = &opts.directory {
+    if let Some(dirs) = &opts.directories {
         for dir in dirs {
             let dir_normalized = normalize::normalize_and_absolutize(dir)?;
             alias_dirs::remove_aliases_by_directory(ad, &dir_normalized.to_string_lossy())?;

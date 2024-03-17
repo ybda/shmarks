@@ -38,17 +38,17 @@ pub struct NewOpts {
     pub force: bool,
 }
 
-/// Remove mark. Removes mark of current dir if no args provided.
+/// Remove mark(s). Removes mark of current dir if no args provided.
 #[derive(Args, Debug)]
 #[command(visible_alias = "r")]
 pub struct RmOpts {
-    /// Alias of the directory to remove.
+    /// Alias(es) of the directory to remove.
     #[clap(short, long, value_hint = ValueHint::Other, conflicts_with="directory",  num_args = 1.., value_delimiter = ' ')]
-    pub alias: Option<Vec<String>>,
+    pub aliases: Option<Vec<String>>,
 
-    /// Directory to remove.
+    /// Directory(ies) to remove.
     #[clap(short, long, value_hint = ValueHint::DirPath, conflicts_with="alias", num_args = 1.., value_delimiter = ' ')]
-    pub directory: Option<Vec<PathBuf>>,
+    pub directories: Option<Vec<PathBuf>>,
 }
 
 /// List all marks.
