@@ -40,11 +40,22 @@ Create, remove, view sorted (by bookmark names of directory paths) bookmarks of 
     }
     
     # Might be interesting to you
+
     alias s='shmarks' # shortcut for 'shmarks' binary
     alias p='shmarks ls -d' # colored list print with directories
     alias se="$EDITOR "$SHMARKS_LIST_PATH"" # edit shmarks
     alias pf='shmarks ls -d | rg'  # find in print of directories
+
+    # fzf jumper
+    sf() {
+        local choice="$(shmarks ls -dp | fzf)"
     
+        if [ -n "$choice" ]; then
+            local dir="$(echo "$choice" | awk '{print $2}')"
+            cd "$dir"
+        fi
+    }
+
     # Autocompletion of alias
     _shmarks_compzsh() {
         reply=($(shmarks ls))
@@ -101,7 +112,7 @@ Save current dir (pwd) to shmarks and sort shmarks file if $SHMARKS_AUTO_SORT wa
 > s n myalias
 ```
 
-Save specified dir to shmarks 
+Save specified dir to shmarks
 
 ```bash
 > shmarks new myalias /my/dir
@@ -131,7 +142,7 @@ List all saved marks like plain GNU "ls" utility
 > shmarks ls 
 ```
 
-List all saved marks like "/bin/ls -l" in columns with dirs showed, colored 
+List all saved marks like "/bin/ls -l" in columns with dirs showed, colored
 
 ```bash
 > shmarks ls -d
