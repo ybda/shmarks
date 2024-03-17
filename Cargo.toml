@@ -1,6 +1,6 @@
 [package]
 name = "shmarks"
-version = "0.1.11"
+version = "0.1.12"
 edition = "2021"
 authors = ["Belkanov Dmitriy <dbkkll@yandex.ru>"]
 description = "Directory bookmarks for the shell."
@@ -12,7 +12,7 @@ readme = "README.md"
 exclude = [
     ".vscode"
 ]
-rust-version = "1.77.0"
+rust-version = "1.77.0" # Nightly is required only because of std::path::absolute
 
 [lints.rust]
 unsafe_code = "forbid"
