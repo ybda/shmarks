@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- README.md
+- Upgrade dependencies
+- Change deprecated method IndexMap.remove to new IndexMap.shift_remove
+
 ## [0.1.11] - 2023-01-25
 
 ### Fixed
