@@ -85,6 +85,19 @@ pub fn print_keys_long_colored(ad: &AliasDirs, key_style: &Style, min_number_of_
     }
 }
 
+pub fn print_keys_long_not_colored(ad: &AliasDirs, min_number_of_spaces: usize) {
+    let padding = {
+        let max_key_length = ad.keys().map(|s| s.len()).max().unwrap_or(0);
+        max_key_length + min_number_of_spaces
+    };
+
+    #[allow(clippy::print_with_newline)]
+    for (key, val) in ad {
+        // don't use `println!` to avoid overhead of flushing each time
+        print!("{:<width$}{}\n", key.to_string(), val, width = padding);
+    }
+}
+
 /// Accept only alphanumeric characters (letters and digits), underscores, and
 /// hyphens. Length must be > zero.
 pub fn alias_name_is_valid(alias_name: &str) -> bool {

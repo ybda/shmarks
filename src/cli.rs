@@ -58,6 +58,10 @@ pub struct LsOpts {
     /// Print directories as well.
     #[clap(short, long)]
     pub directory: bool,
+
+    /// Turn off colors.
+    #[clap(short, long)]
+    pub plain: bool,
 }
 
 /// Sort shmarks file.

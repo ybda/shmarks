@@ -1,6 +1,6 @@
 use crate::alias_dirs::AliasDirs;
 use crate::cli::{LsOpts, NewOpts, RmOpts, SortOpts, Subcommand};
-use crate::constants::LS_ALIAS_STYLE_NUMBER_OF_SPACES;
+use crate::constants::LONG_LIST_PRINT_NUMBER_OF_SPACES;
 use crate::error::{Error, Result};
 use crate::{alias_dirs, constants, normalize, shmarks_warning, util};
 
@@ -76,12 +76,15 @@ fn list(opts: &LsOpts, ad: &AliasDirs) {
     }
 
     if opts.directory {
-        // Colored print in two columns
-        alias_dirs::print_keys_long_colored(
-            ad,
-            &constants::ls_alias_style(),
-            LS_ALIAS_STYLE_NUMBER_OF_SPACES,
-        );
+        if opts.plain {
+            alias_dirs::print_keys_long_not_colored(ad, LONG_LIST_PRINT_NUMBER_OF_SPACES);
+        } else {
+            alias_dirs::print_keys_long_colored(
+                ad,
+                &constants::ls_alias_style(),
+                LONG_LIST_PRINT_NUMBER_OF_SPACES,
+            );
+        }
     } else {
         // Simple print like "a1 a2 a3\n"
         util::print_separated_by_space(ad.keys());
