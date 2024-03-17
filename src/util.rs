@@ -2,7 +2,7 @@ use std::fmt::Display;
 use std::fs::File;
 use std::hash::Hash;
 use std::io::Read;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use indexmap::IndexMap;
 
@@ -42,4 +42,16 @@ where
     for item in iter {
         print!(" {}", item);
     }
+}
+
+pub fn env_current_dir_with_err_map() -> std::result::Result<PathBuf, String> {
+    std::env::current_dir().map_err(|err| format!("Failed retrieving current directory: {}", err))
+}
+
+#[macro_export]
+macro_rules! shmarks_warning {
+    ($($arg:tt)*) => ({
+        use nu_ansi_term::Color::Yellow;
+        eprintln!("{}: {}", Yellow.paint("[shmarks warning]"), format!($($arg)*));
+    })
 }

@@ -43,12 +43,12 @@ pub struct NewOpts {
 #[command(visible_alias = "r")]
 pub struct RmOpts {
     /// Alias of the directory to remove.
-    #[clap(short, long, value_hint = ValueHint::Other, conflicts_with="directory")]
-    pub alias: Option<String>,
+    #[clap(short, long, value_hint = ValueHint::Other, conflicts_with="directory",  num_args = 1.., value_delimiter = ' ')]
+    pub alias: Option<Vec<String>>,
 
     /// Directory to remove.
-    #[clap(short, long, value_hint = ValueHint::DirPath, conflicts_with="alias")]
-    pub directory: Option<PathBuf>,
+    #[clap(short, long, value_hint = ValueHint::DirPath, conflicts_with="alias", num_args = 1.., value_delimiter = ' ')]
+    pub directory: Option<Vec<PathBuf>>,
 }
 
 /// List all marks.

@@ -7,7 +7,7 @@ use nu_ansi_term::Style;
 
 use crate::cli::Cli;
 use crate::error::{Error, Result};
-use crate::{normalize, util};
+use crate::{normalize, shmarks_warning, util};
 
 pub type AliasDirs = IndexMap<String, String>;
 
@@ -65,7 +65,7 @@ pub fn remove_aliases_by_directory(ad: &mut AliasDirs, directory: &str) -> Resul
     ad.retain(|_, v| v != directory);
 
     if len_before == ad.len() {
-        return Err(Error::AliasOfDirectoryXNotFound(directory.to_string()));
+        shmarks_warning!("Alias of directory '{}' not found", directory.to_string());
     }
 
     Ok(())
@@ -89,14 +89,4 @@ pub fn print_keys_long_colored(ad: &AliasDirs, key_style: &Style, min_number_of_
 pub fn alias_name_is_valid(alias_name: &str) -> bool {
     let pattern = regex::Regex::new(r"^[a-zA-Z0-9_-]+$").unwrap();
     pattern.is_match(alias_name)
-}
-
-pub fn directory_from_arguments_or_pwd(directory: &Option<PathBuf>) -> Result<PathBuf> {
-    let dir = if let Some(dir) = directory {
-        normalize::normalize_and_absolutize(&dir)?
-    } else {
-        std::env::current_dir()
-            .map_err(|err| format!("Failed retrieving current directory: {}", err))?
-    };
-    Ok(dir)
 }

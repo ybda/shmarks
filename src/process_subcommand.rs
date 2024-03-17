@@ -2,7 +2,7 @@ use crate::alias_dirs::AliasDirs;
 use crate::cli::{LsOpts, NewOpts, RmOpts, SortOpts, Subcommand};
 use crate::constants::LS_ALIAS_STYLE_NUMBER_OF_SPACES;
 use crate::error::{Error, Result};
-use crate::{alias_dirs, constants, util};
+use crate::{alias_dirs, constants, normalize, shmarks_warning, util};
 
 pub fn process(subcommand: &Subcommand, ad: &mut AliasDirs) -> Result<()> {
     match subcommand {
@@ -26,7 +26,11 @@ fn new(opts: &NewOpts, ad: &mut AliasDirs) -> Result<()> {
         return Err(Error::AliasAlreadyExists(opts.alias.to_string()));
     }
 
-    let directory = alias_dirs::directory_from_arguments_or_pwd(&opts.directory)?;
+    let directory = if let Some(dir) = &opts.directory {
+        normalize::normalize_and_absolutize(&dir)?
+    } else {
+        util::env_current_dir_with_err_map()?
+    };
 
     ad.insert(opts.alias.clone(), directory.to_string_lossy().to_string());
 
@@ -34,18 +38,34 @@ fn new(opts: &NewOpts, ad: &mut AliasDirs) -> Result<()> {
 }
 
 fn remove(opts: &RmOpts, ad: &mut AliasDirs) -> Result<()> {
-    if let Some(alias) = &opts.alias {
-        if !ad.contains_key(alias) {
-            return Err(Error::AliasNotFound(alias.to_string()));
-        }
+    // By aliases
 
-        ad.shift_remove(alias);
+    if let Some(aliases) = &opts.alias {
+        for alias in aliases {
+            if !ad.contains_key(alias) {
+                shmarks_warning!("Alias '{}' not found", alias);
+                continue;
+            }
+
+            ad.shift_remove(alias);
+        }
         return Ok(());
     }
 
-    let directory = alias_dirs::directory_from_arguments_or_pwd(&opts.directory)?;
+    // By directories
 
-    alias_dirs::remove_aliases_by_directory(ad, &directory.to_string_lossy())?;
+    if let Some(dirs) = &opts.directory {
+        for dir in dirs {
+            let dir_normalized = normalize::normalize_and_absolutize(&dir)?;
+            alias_dirs::remove_aliases_by_directory(ad, &dir_normalized.to_string_lossy())?;
+        }
+        return Ok(());
+    }
+
+    // By current working directory (no arguments provided)
+
+    let dir = util::env_current_dir_with_err_map()?;
+    alias_dirs::remove_aliases_by_directory(ad, &dir.to_string_lossy())?;
 
     Ok(())
 }

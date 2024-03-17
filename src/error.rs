@@ -23,9 +23,6 @@ pub enum Error {
     #[error("Alias '{0}' not found")]
     AliasNotFound(String),
 
-    #[error("Alias of directory '{0}' not found")]
-    AliasOfDirectoryXNotFound(String),
-
     #[error("Alias '{0}' already exists")]
     AliasAlreadyExists(String),
 }
