@@ -17,7 +17,7 @@ Create, remove, view sorted (by bookmark names of directory paths) bookmarks of 
 1. **Install binary**
 
     ```bash
-    > cargo install shmarks --locked
+    > cargo +nightly install shmarks --locked
     ```
 
 2. **Add code in your .zshrc** (should work with little changes in other shells as well)
