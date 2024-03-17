@@ -6,10 +6,10 @@ use crate::{alias_dirs, constants, normalize, shmarks_warning, util};
 
 pub fn process(subcommand: &Subcommand, ad: &mut AliasDirs) -> Result<()> {
     match subcommand {
-        Subcommand::New(opts) => new(&opts, ad)?,
-        Subcommand::Rm(opts) => remove(&opts, ad)?,
-        Subcommand::Ls(opts) => list(&opts, ad),
-        Subcommand::Sort(opts) => sort(&opts, ad),
+        Subcommand::New(opts) => new(opts, ad)?,
+        Subcommand::Rm(opts) => remove(opts, ad)?,
+        Subcommand::Ls(opts) => list(opts, ad),
+        Subcommand::Sort(opts) => sort(opts, ad),
     }
     Ok(())
 }
@@ -27,7 +27,7 @@ fn new(opts: &NewOpts, ad: &mut AliasDirs) -> Result<()> {
     }
 
     let directory = if let Some(dir) = &opts.directory {
-        normalize::normalize_and_absolutize(&dir)?
+        normalize::normalize_and_absolutize(dir)?
     } else {
         util::env_current_dir_with_err_map()?
     };
@@ -56,7 +56,7 @@ fn remove(opts: &RmOpts, ad: &mut AliasDirs) -> Result<()> {
 
     if let Some(dirs) = &opts.directory {
         for dir in dirs {
-            let dir_normalized = normalize::normalize_and_absolutize(&dir)?;
+            let dir_normalized = normalize::normalize_and_absolutize(dir)?;
             alias_dirs::remove_aliases_by_directory(ad, &dir_normalized.to_string_lossy())?;
         }
         return Ok(());

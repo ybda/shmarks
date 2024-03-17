@@ -1,13 +1,13 @@
 use std::fs::File;
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use indexmap::IndexMap;
 use nu_ansi_term::Style;
 
 use crate::cli::Cli;
 use crate::error::{Error, Result};
-use crate::{normalize, shmarks_warning, util};
+use crate::{shmarks_warning, util};
 
 pub type AliasDirs = IndexMap<String, String>;
 
@@ -56,7 +56,7 @@ pub fn process_directory_jump(cli: &Cli, ad: &AliasDirs) -> Result<()> {
 
     println!("{}", directory_of_alias);
 
-    return Ok(());
+    Ok(())
 }
 
 pub fn remove_aliases_by_directory(ad: &mut AliasDirs, directory: &str) -> Result<()> {
@@ -78,6 +78,7 @@ pub fn print_keys_long_colored(ad: &AliasDirs, key_style: &Style, min_number_of_
         max_key_length + key_style_len + min_number_of_spaces
     };
 
+    #[allow(clippy::print_with_newline)]
     for (key, val) in ad {
         // don't use `println!` to avoid overhead of flushing each time
         print!("{:<width$}{}\n", key_style.paint(key).to_string(), val, width = padding);

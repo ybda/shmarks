@@ -60,7 +60,7 @@ fn process_args<P: AsRef<Path>>(cli: &Cli, ad: &mut AliasDirs, shmarks_filepath:
             s
         }
         None => {
-            alias_dirs::process_directory_jump(&cli, ad)?;
+            alias_dirs::process_directory_jump(cli, ad)?;
             return Ok(());
         }
     };
