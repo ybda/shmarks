@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Batching for rm command (now you can pass multiple directories or aliases at once)
+
 ### Changed
 
 - README.md
