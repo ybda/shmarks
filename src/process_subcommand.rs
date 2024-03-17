@@ -39,7 +39,7 @@ fn remove(opts: &RmOpts, ad: &mut AliasDirs) -> Result<()> {
             return Err(Error::AliasNotFound(alias.to_string()));
         }
 
-        ad.remove(alias);
+        ad.shift_remove(alias);
         return Ok(());
     }
 
