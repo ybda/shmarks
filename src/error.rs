@@ -17,6 +17,9 @@ pub enum Error {
     #[error(transparent)]
     TomlDe(#[from] ::toml::de::Error),
 
+    #[error(transparent)]
+    Var(#[from] ::std::env::VarError),
+
     #[error("{0}")]
     Msg(String),
 

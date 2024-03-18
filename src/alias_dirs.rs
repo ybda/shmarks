@@ -1,13 +1,15 @@
+use std::borrow::Cow;
+use std::env;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 
 use indexmap::IndexMap;
-use nu_ansi_term::Style;
 
 use crate::cli::Cli;
+use crate::constants::{ENV_VAR_SHMARKS_DEFAULT_ALIAS, LONG_LIST_PRINT_NUMBER_OF_SPACES};
 use crate::error::{Error, Result};
-use crate::{shmarks_warning, util};
+use crate::{constants, shmarks_warning, util};
 
 pub type AliasDirs = IndexMap<String, String>;
 
@@ -71,24 +73,42 @@ pub fn remove_aliases_by_directory(ad: &mut AliasDirs, directory: &str) -> Resul
     Ok(())
 }
 
-pub fn print_keys_long_colored(ad: &AliasDirs, key_style: &Style, min_number_of_spaces: usize) {
+pub fn print_keys_long_colored(ad: &AliasDirs) -> Result<()> {
+    let style_normal = constants::ls_alias_style_normal();
+
     let padding = {
         let max_key_length = ad.keys().map(|s| s.len()).max().unwrap_or(0);
-        let key_style_len = key_style.paint(".").to_string().len() - 1; // minus one because we don't count the dot
-        max_key_length + key_style_len + min_number_of_spaces
+        let key_style_len = style_normal.paint(".").to_string().len() - 1; // minus one because we don't count the dot
+        max_key_length + key_style_len + LONG_LIST_PRINT_NUMBER_OF_SPACES
     };
+
+    let current_dir_pathbuf = util::env_current_dir_with_err_map()?;
+    let current_dir = current_dir_pathbuf.to_str().unwrap();
+
+    let default_dir = env::var(ENV_VAR_SHMARKS_DEFAULT_ALIAS).unwrap_or("".to_owned());
 
     #[allow(clippy::print_with_newline)]
     for (key, val) in ad {
+        let current_key_style = if val == current_dir {
+            Cow::Owned(constants::ls_alias_style_current())
+        } else if key == &default_dir {
+            Cow::Owned(constants::ls_alias_style_default())
+        } else if !Path::new(&val).exists() {
+            Cow::Owned(constants::ls_alias_style_removed())
+        } else {
+            Cow::Borrowed(&style_normal)
+        };
+
         // don't use `println!` to avoid overhead of flushing each time
-        print!("{:<width$}{}\n", key_style.paint(key).to_string(), val, width = padding);
+        print!("{:<width$}{}\n", current_key_style.paint(key).to_string(), val, width = padding);
     }
+    Ok(())
 }
 
-pub fn print_keys_long_not_colored(ad: &AliasDirs, min_number_of_spaces: usize) {
+pub fn print_keys_long_not_colored(ad: &AliasDirs) {
     let padding = {
         let max_key_length = ad.keys().map(|s| s.len()).max().unwrap_or(0);
-        max_key_length + min_number_of_spaces
+        max_key_length + LONG_LIST_PRINT_NUMBER_OF_SPACES
     };
 
     #[allow(clippy::print_with_newline)]

@@ -1,14 +1,13 @@
 use crate::alias_dirs::AliasDirs;
 use crate::cli::{LsOpts, NewOpts, RmOpts, SortOpts, Subcommand};
-use crate::constants::LONG_LIST_PRINT_NUMBER_OF_SPACES;
 use crate::error::{Error, Result};
-use crate::{alias_dirs, constants, normalize, shmarks_warning, util};
+use crate::{alias_dirs, normalize, shmarks_warning, util};
 
 pub fn process(subcommand: &Subcommand, ad: &mut AliasDirs) -> Result<()> {
     match subcommand {
         Subcommand::New(opts) => new(opts, ad)?,
         Subcommand::Rm(opts) => remove(opts, ad)?,
-        Subcommand::Ls(opts) => list(opts, ad),
+        Subcommand::Ls(opts) => list(opts, ad)?,
         Subcommand::Sort(opts) => sort(opts, ad),
     }
     Ok(())
@@ -70,26 +69,24 @@ fn remove(opts: &RmOpts, ad: &mut AliasDirs) -> Result<()> {
     Ok(())
 }
 
-fn list(opts: &LsOpts, ad: &AliasDirs) {
+fn list(opts: &LsOpts, ad: &AliasDirs) -> Result<()> {
     if ad.keys().len() == 0 {
-        return;
+        return Ok(());
     }
 
     if opts.directory {
         if opts.plain {
-            alias_dirs::print_keys_long_not_colored(ad, LONG_LIST_PRINT_NUMBER_OF_SPACES);
+            alias_dirs::print_keys_long_not_colored(ad);
         } else {
-            alias_dirs::print_keys_long_colored(
-                ad,
-                &constants::ls_alias_style(),
-                LONG_LIST_PRINT_NUMBER_OF_SPACES,
-            );
+            alias_dirs::print_keys_long_colored(ad)?;
         }
     } else {
         // Simple print like "a1 a2 a3\n"
         util::print_separated_by_space(ad.keys());
         println!();
     }
+
+    Ok(())
 }
 
 fn sort(opts: &SortOpts, ad: &mut AliasDirs) {
