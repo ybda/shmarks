@@ -9,7 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-Nothing yet
+### Added
+
+- Add colors for default, current and removed directories in colored print with directories
+- Flag to print marks with directories without color (`--plain`)
+- README.md: `+nightly` in install command
+- README.md: fzf jumper function
 
 ## [0.1.12] - 2024-03-17
 
