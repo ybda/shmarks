@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+Nothing yet
+
+## [0.1.13] - 2024-03-21
+
 ### Added
 
 - Add colors for default, current and removed directories in colored print with directories
@@ -59,6 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - This file (CHANGELOG.md).
 - Restriction of alias replacement by default (--force flag for new subcommand)
 
+[0.1.13]: https://github.com/ybda/shmarks/commits/v0.1.13
 [0.1.12]: https://github.com/ybda/shmarks/commits/v0.1.12
 [0.1.11]: https://github.com/ybda/shmarks/commits/v0.1.11
 [0.1.10]: https://github.com/ybda/shmarks/commits/v0.1.10
