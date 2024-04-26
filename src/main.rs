@@ -1,5 +1,3 @@
-#![feature(absolute_path)]
-
 use clap::Parser;
 mod alias_dirs;
 mod cli;
