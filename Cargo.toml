@@ -18,11 +18,11 @@ rust-version = "1.79.0" # Nightly is required only because of std::path::absolut
 unsafe_code = "forbid"
 
 [dependencies]
-clap = { version = "4.5.3", features = ["cargo", "derive"] }
+clap = { version = "4.5.4", features = ["cargo", "derive"] }
 dirs = "5.0.1"
-indexmap = { version = "2.2.5", features = ["serde"] }
+indexmap = { version = "2.2.6", features = ["serde"] }
 nu-ansi-term = "0.50"
-regex = "1.10.3"
+regex = "1.10.4"
 thiserror = "1.0"
-toml = { version = "0.8.11", features = ["preserve_order"] }
+toml = { version = "0.8.12", features = ["preserve_order"] }
 serde = { version = "1.0", features = ["derive"] }
