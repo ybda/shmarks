@@ -12,7 +12,7 @@ readme = "README.md"
 exclude = [
     ".vscode"
 ]
-rust-version = "1.79.0" # Nightly is required only because of std::path::absolute
+rust-version = "1.79.0"
 
 [lints.rust]
 unsafe_code = "forbid"

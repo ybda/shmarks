@@ -17,7 +17,7 @@ Create, remove, view sorted (by bookmark names of directory paths) bookmarks of 
 1. **Install binary**
 
     ```bash
-    > cargo +nightly install shmarks --locked
+    > cargo install shmarks --locked
     ```
 
 2. **Add code in your .zshrc** (should work with little changes in other shells as well)
@@ -160,7 +160,6 @@ Sort shmarks by directories (alphabetical order)
 
 ### Note
 - By default, shmarks.toml located in $XDG_DATA_HOME or $HOME/.local/share. You could override it with $SHMARKS_LIST_PATH
-- It requires nightly Rust only because of the "std::path::absolute" to resolve relative paths that might not exist
 
 ### Inspired by
 - ![huyng/bashmarks][huyng/bashmarks]
