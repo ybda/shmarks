@@ -162,7 +162,7 @@ Sort shmarks by directories (alphabetical order)
 - By default, shmarks.toml located in $XDG_DATA_HOME or $HOME/.local/share. You could override it with $SHMARKS_LIST_PATH
 
 ### Inspired by
-- ![huyng/bashmarks][huyng/bashmarks]
+- [huyng/bashmarks][huyng/bashmarks]
 
 [crates.io-badge]: https://img.shields.io/crates/v/shmarks?logo=rust&logoColor=white&style=flat-square
 [crates.io]: https://crates.io/crates/shmarks
