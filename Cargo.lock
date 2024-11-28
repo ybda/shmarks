@@ -318,7 +318,6 @@ dependencies = [
  "indexmap",
  "nu-ansi-term",
  "regex",
- "serde",
  "thiserror",
  "toml",
 ]
