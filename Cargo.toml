@@ -18,10 +18,10 @@ rust-version = "1.79.0"
 unsafe_code = "forbid"
 
 [dependencies]
-clap = { version = "4.5.7", features = ["cargo", "derive"] }
+clap = { version = "4.5.21", features = ["cargo", "derive"] }
 dirs = "5.0.1"
-indexmap = { version = "2.2.6", features = ["serde"] }
+indexmap = { version = "2.6.0", features = ["serde"] }
 nu-ansi-term = "0.50"
-regex = "1.10.5"
-thiserror = "1.0"
-toml = { version = "0.8.14", features = ["preserve_order"] }
+regex = "1.11"
+thiserror = "2.0"
+toml = { version = "0.8.19", features = ["preserve_order"] }
