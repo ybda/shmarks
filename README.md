@@ -63,6 +63,21 @@ Create, remove, view sorted (by bookmark names of directory paths) bookmarks of 
     compctl -K _shmarks_compzsh f # change 'f' to alias set for jumping (6th line)
     ```
 
+    For PowerShell:
+
+    ```powershell
+    # Jump by alias
+    function f($aliasName) {
+	    if (!$aliasName) {
+            # Jump to default dir if no arguments provided
+            Set-Location (shmarks -a $env:SHMARKS_DEFAULT_ALIAS)
+        } else {
+            # Jump to directory based on alias argument
+            Set-Location (shmarks -a $aliasName)
+        }
+    }
+    ```
+
 ## Usage
 ```bash
 > shmarks
